@@ -182,6 +182,7 @@ const ApiRoutes = {
   },
   StreamRulesApiController: {
     delete: (streamId, streamRuleId) => { return { url: `/streams/${streamId}/rules/${streamRuleId}` }; },
+    deleteAll: (streamId) => { return { url: `/streams/${streamId}/rules/all` }; },
     update: (streamId, streamRuleId) => { return { url: `/streams/${streamId}/rules/${streamRuleId}` }; },
     create: (streamId) => { return { url: `/streams/${streamId}/rules` }; },
   },

@@ -215,6 +215,29 @@ public class StreamRuleResource extends RestResource {
         }
     }
 
+    @DELETE
+    @Path("/all")
+    @Timed
+    @ApiOperation(value = "Delete all rule by stream id")
+    @ApiResponses(value = {
+            @ApiResponse(code = 404, message = "Stream rule not found."),
+            @ApiResponse(code = 400, message = "Invalid ObjectId.")
+    })
+    @AuditEvent(type = AuditEventTypes.STREAM_RULE_DELETE)
+    public void deleteAll(@ApiParam(name = "streamid", value = "The stream id this new rule belongs to.", required = true)
+                       @PathParam("streamid") String streamid) throws NotFoundException {
+        checkPermission(RestPermissions.STREAMS_EDIT, streamid);
+        checkNotDefaultStream(streamid, "Cannot delete stream rule from default stream.");
+
+        final List<StreamRule> streamRules = streamRuleService.loadForStreamId(streamid);
+        for (StreamRule streamRule : streamRules){
+            streamRuleService.destroy(streamRule);
+        }
+        if (!streamRules.isEmpty()){
+            clusterEventBus.post(StreamsChangedEvent.create(streamid));
+        }
+    }
+
     @GET
     @Path("/types")
     @Timed

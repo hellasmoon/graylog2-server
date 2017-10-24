@@ -60,6 +60,15 @@ class StreamRulesStore {
     var url = URLUtils.qualifyUrl(ApiRoutes.StreamRulesApiController.delete(streamId, streamRuleId).url);
     fetch('DELETE', url).then(callback, failCallback).then(this._emitChange.bind(this));
   }
+  removeAll(streamId: string, callback: (() => void)) {
+    var failCallback = (error) => {
+      UserNotification.error("Deleting All Stream Rule failed with status: " + error,
+        "Could not delete all Stream Rule");
+    };
+
+    var url = URLUtils.qualifyUrl(ApiRoutes.StreamRulesApiController.deleteAll(streamId).url);
+    fetch('DELETE', url).then(callback, failCallback).then(this._emitChange.bind(this));
+  }
   create(streamId: string, data: StreamRule, callback: (() => void)) {
     var failCallback = (error) => {
       UserNotification.error("Creating Stream Rule failed with status: " + error,
