@@ -1,5 +1,5 @@
 window.appConfig = {
-  gl2ServerUrl: 'http://localhost:9000/api',
+  gl2ServerUrl: 'http://0.0.0.0:9000/api',
   gl2AppPathPrefix: '',
-  rootTimeZone: 'Europe/Berlin',
+  rootTimeZone: 'Asia/Shanghai',
 };
