@@ -14,6 +14,7 @@ import DocsHelper from 'util/DocsHelper';
 import StoreProvider from 'injection/StoreProvider';
 const SearchStore = StoreProvider.getStore('Search');
 const ToolsStore = StoreProvider.getStore('Tools');
+const StreamsStore = StoreProvider.getStore('Streams');
 
 import ActionsProvider from 'injection/ActionsProvider';
 const SavedSearchesActions = ActionsProvider.getActions('SavedSearches');
@@ -46,6 +47,8 @@ const SearchBar = React.createClass({
       query: this.initialSearchParams.query,
       savedSearch: SearchStore.savedSearch,
       keywordPreview: Immutable.Map(),
+      searchFrom:"group",
+      streams:undefined,
     };
   },
   componentDidMount() {
@@ -55,6 +58,11 @@ const SearchBar = React.createClass({
     };
     SearchStore.onAddQueryTerm = this._animateQueryChange;
     this._initializeSearchQueryInput();
+    StreamsStore.load((streams) => {
+      this.setState({
+        streams: streams,
+      });
+    });
   },
   componentDidUpdate(prevProps, prevState) {
     if (this.state.query !== prevState.query) {
@@ -105,6 +113,9 @@ const SearchBar = React.createClass({
   _rangeTypeChanged(newRangeType, event) {
     SearchStore.rangeType = newRangeType;
     this._resetKeywordPreview();
+  },
+  _searchFromChanged(newFrom, event) {
+    this.setState({searchFrom:newFrom});
   },
   _rangeParamsChanged(key) {
     return () => {
@@ -221,6 +232,9 @@ const SearchBar = React.createClass({
     const streamId = SearchStore.searchInStream ? SearchStore.searchInStream.id : undefined;
     SavedSearchesActions.execute.triggerPromise(searchId, streamId, $(window).width());
   },
+  _onGroupSelect(group) {
+    console.log(group);
+  },
 
   _onDateSelected(field) {
     return (date, _, event) => {
@@ -268,7 +282,7 @@ const SearchBar = React.createClass({
 
         selector = (
           <div className="timerange-selector relative"
-               style={{ width: 270, marginLeft: 50 }}>
+               style={{ width: 270, marginLeft: 10, float: 'left' }}>
             <Input id="relative-timerange-selector"
                    ref="relative"
                    type="select"
@@ -284,8 +298,8 @@ const SearchBar = React.createClass({
       }
       case 'absolute': {
         selector = (
-          <div className="timerange-selector absolute" style={{ width: 600 }}>
-            <div className="row no-bm" style={{ marginLeft: 50 }}>
+          <div className="timerange-selector absolute" style={{ width: 680, float: 'left'  }}>
+            <div className="row no-bm" style={{ marginLeft: 10 }}>
               <div className="col-md-5" style={{ padding: 0 }}>
                 <input type="hidden" name="from" ref={(ref) => { this.from = ref; }} />
                 <DatePicker id="searchFromDatePicker"
@@ -331,8 +345,8 @@ const SearchBar = React.createClass({
       }
       case 'keyword': {
         selector = (
-          <div className="timerange-selector keyword" style={{ width: 650 }}>
-            <div className="row no-bm" style={{ marginLeft: 50 }}>
+          <div className="timerange-selector keyword" style={{ width: 680, float: 'left'  }}>
+            <div className="row no-bm" style={{ marginLeft: 10 }}>
               <div className="col-md-5" style={{ padding: 0 }}>
                 <Input type="text"
                        ref="keyword"
@@ -376,6 +390,40 @@ const SearchBar = React.createClass({
     );
   },
 
+  _formatGroup(group){
+    if (group.title.startsWith("_Group:")){
+      group.title = group.title.substr(7);
+      return group;
+    }
+  },
+
+  _getSeachFromSelector() {
+    if (!this.state.streams){
+      return undefined;
+    }
+    let selector;
+    switch (this.state.searchFrom) {
+      case 'group':
+        const groups = this.state.streams
+          .sort((streamA, streamB) => streamA.title.toLowerCase().localeCompare(streamB.title.toLowerCase()))
+          .filter(this._formatGroup);
+        const formattedGroups = groups
+          .map((group) => {
+            return { value: group.id, label: group.title };
+          });
+        selector = (
+          <Select placeholder="search from groups" options={formattedGroups} value={this.state.streams}
+                  onValueChange={this._onGroupSelect} size="small" />
+        );
+        break;
+      case 'ip':
+        break;
+    }
+
+    return selector;
+
+  },
+
   render() {
     return (
       <div className="row no-bm">
@@ -394,10 +442,10 @@ const SearchBar = React.createClass({
 
                 <div className="timerange-selector-container">
                   <div className="row no-bm">
-                    <div className="col-md-6">
+                    <div className="col-md-6" style={{ width: '70%' }}>
                       <ButtonToolbar className="timerange-chooser pull-left">
                         <DropdownButton bsStyle="info"
-                                        title={<i className="fa fa-clock-o" />}
+                                        title={<i className="fa fa-clock-o " />}
                                         onSelect={this._rangeTypeChanged}
                                         id="dropdown-timerange-selector">
                           <MenuItem eventKey="relative"
@@ -416,8 +464,28 @@ const SearchBar = React.createClass({
                       </ButtonToolbar>
 
                       {this._getRangeTypeSelector()}
+
+                      <ButtonToolbar className="timerange-chooser pull-left" style={{ marginLeft: 10 }}>
+                        <DropdownButton bsStyle="info"
+                                        title={<i className="fa fa-share-alt-square" />}
+                                        onSelect={this._searchFromChanged}
+                                        id="dropdown-timerange-selector">
+                          <MenuItem eventKey="group"
+                                    className={this.state.searchFrom === 'group' ? 'selected' : null}>
+                            Seach By Group
+                          </MenuItem>
+                          <MenuItem eventKey="ip"
+                                    className={this.state.searchFrom === 'ip' ? 'selected' : null}>
+                            Seach By IP
+                          </MenuItem>
+                        </DropdownButton>
+                      </ButtonToolbar>
+
+                      <div style={{ width: 270,float: 'left', marginLeft: 10 }}>
+                        {this._getSeachFromSelector()}
+                      </div>
                     </div>
-                    <div className="col-md-6">
+                    <div className="col-md-6" style={{ width: '30%' }}>
                       <div className="saved-searches-selector-container pull-right"
                            style={{ display: 'inline-flex', marginRight: 5 }}>
                         {this.props.displayRefreshControls &&
