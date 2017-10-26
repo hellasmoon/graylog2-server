@@ -8,7 +8,7 @@ import URI from 'urijs';
 import history from 'util/History';
 
 import { Input } from 'components/bootstrap';
-import { DatePicker, Select } from 'components/common';
+import { DatePicker, Select, Spinner } from 'components/common';
 import { RefreshControls, QueryInput } from 'components/search';
 import DocumentationLink from 'components/support/DocumentationLink';
 import DocsHelper from 'util/DocsHelper';
@@ -415,7 +415,7 @@ const SearchBar = React.createClass({
 
   _getSeachFromSelector() {
     if (!this.state.streams){
-      return undefined;
+      return <Spinner />;
     }
     let selector;
     switch (this.state.searchFrom) {
