@@ -52,10 +52,10 @@ const SearchBar = React.createClass({
       query: this.initialSearchParams.query,
       savedSearch: SearchStore.savedSearch,
       keywordPreview: Immutable.Map(),
-      searchFrom:"group",
-      streams:undefined,
-      chosenGroup:SearchStore.searchInStream ? SearchStore.searchInStream.title.substr(7) : undefined,
-      chosenIP:undefined,
+      searchFrom: SearchStore.searchInStream ? (SearchStore.searchInStream.title.startsWith("_IP:") ? "ip" : "group") : "group",
+      streams: undefined,
+      chosenGroup: SearchStore.searchInStream ? (SearchStore.searchInStream.title.startsWith("_Group:") ? SearchStore.searchInStream.title.substr(7) : undefined) : undefined,
+      chosenIP: SearchStore.searchInStream ? (SearchStore.searchInStream.title.startsWith("_IP:") ? SearchStore.searchInStream.title.substr(4) : undefined) : undefined,
     };
   },
   componentDidMount() {
