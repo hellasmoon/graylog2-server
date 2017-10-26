@@ -433,6 +433,9 @@ const SearchBar = React.createClass({
         );
         break;
       case 'ip':
+        selector = (
+          <Spinner />
+        );
         break;
     }
 

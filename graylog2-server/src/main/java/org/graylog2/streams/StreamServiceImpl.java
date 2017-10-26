@@ -153,6 +153,16 @@ public class StreamServiceImpl extends PersistedServiceImpl implements StreamSer
     }
 
     @Override
+    public List<Stream> loadByTitle(String title) {
+        return loadByTitle(title, new HashMap<>());
+    }
+
+    public List<Stream> loadByTitle(String title, Map<String, Object> additionalQueryOpts){
+        additionalQueryOpts.put(StreamImpl.FIELD_TITLE, title);
+        return loadAll(additionalQueryOpts);
+    }
+
+    @Override
     public List<Stream> loadAllEnabled() {
         return loadAllEnabled(new HashMap<>());
     }

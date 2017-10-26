@@ -35,6 +35,8 @@ public interface StreamService extends PersistedService {
 
     Stream load(String id) throws NotFoundException;
 
+    List<Stream> loadByTitle(String title);
+
     void destroy(Stream stream) throws NotFoundException;
 
     List<Stream> loadAll();
