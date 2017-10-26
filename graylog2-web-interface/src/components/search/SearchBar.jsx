@@ -25,6 +25,7 @@ import UIUtils from 'util/UIUtils';
 
 import DateTime from 'logic/datetimes/DateTime';
 import moment from 'moment';
+import Routes from 'routing/Routes';
 
 const SearchBar = React.createClass({
   propTypes: {
@@ -306,7 +307,7 @@ const SearchBar = React.createClass({
       }
       case 'absolute': {
         selector = (
-          <div className="timerange-selector absolute" style={{ width: 680, float: 'left'  }}>
+          <div className="timerange-selector absolute" style={{ width: 650, float: 'left'  }}>
             <div className="row no-bm" style={{ marginLeft: 10 }}>
               <div className="col-md-5" style={{ padding: 0 }}>
                 <input type="hidden" name="from" ref={(ref) => { this.from = ref; }} />
@@ -353,7 +354,7 @@ const SearchBar = React.createClass({
       }
       case 'keyword': {
         selector = (
-          <div className="timerange-selector keyword" style={{ width: 680, float: 'left'  }}>
+          <div className="timerange-selector keyword" style={{ width: 650, float: 'left'  }}>
             <div className="row no-bm" style={{ marginLeft: 10 }}>
               <div className="col-md-5" style={{ padding: 0 }}>
                 <Input type="text"
@@ -400,16 +401,15 @@ const SearchBar = React.createClass({
 
   _formatGroup(group){
     if (group.title.startsWith("_Group:") && !group.disabled){
-      group.title = group.title.substr(7);
       return group;
     }
   },
 
   _onGroupSelect(stream_id) {
     if (stream_id === ''){
-      history.push("/search");
+      history.push(Routes.search());
     }else{
-      history.push("/streams/"+stream_id+"/search");
+      history.push(Routes.stream_search(stream_id));
     }
   },
 
@@ -425,7 +425,7 @@ const SearchBar = React.createClass({
           .filter(this._formatGroup);
         const formattedGroups = groups
           .map((group) => {
-            return { value: group.id, label: group.title };
+            return { value: group.id, label: group.title.substr(7) };
           });
         selector = (
           <Select placeholder="search from groups" options={formattedGroups} value={this.state.chosenGroup}
@@ -461,6 +461,26 @@ const SearchBar = React.createClass({
                     <div className="col-md-6" style={{ width: '70%' }}>
                       <ButtonToolbar className="timerange-chooser pull-left">
                         <DropdownButton bsStyle="info"
+                                        title={<i className="fa fa-share-alt-square" />}
+                                        onSelect={this._searchFromChanged}
+                                        id="dropdown-timerange-selector">
+                          <MenuItem eventKey="group"
+                                    className={this.state.searchFrom === 'group' ? 'selected' : null}>
+                            Seach By Group
+                          </MenuItem>
+                          <MenuItem eventKey="ip"
+                                    className={this.state.searchFrom === 'ip' ? 'selected' : null}>
+                            Seach By IP
+                          </MenuItem>
+                        </DropdownButton>
+                      </ButtonToolbar>
+
+                      <div style={{ width: 270,float: 'left', marginLeft: 10 }}>
+                        {this._getSeachFromSelector()}
+                      </div>
+
+                      <ButtonToolbar className="timerange-chooser pull-left" style={{ marginLeft: 10 }}>
+                        <DropdownButton bsStyle="info"
                                         title={<i className="fa fa-clock-o " />}
                                         onSelect={this._rangeTypeChanged}
                                         id="dropdown-timerange-selector">
@@ -481,25 +501,6 @@ const SearchBar = React.createClass({
 
                       {this._getRangeTypeSelector()}
 
-                      <ButtonToolbar className="timerange-chooser pull-left" style={{ marginLeft: 10 }}>
-                        <DropdownButton bsStyle="info"
-                                        title={<i className="fa fa-share-alt-square" />}
-                                        onSelect={this._searchFromChanged}
-                                        id="dropdown-timerange-selector">
-                          <MenuItem eventKey="group"
-                                    className={this.state.searchFrom === 'group' ? 'selected' : null}>
-                            Seach By Group
-                          </MenuItem>
-                          <MenuItem eventKey="ip"
-                                    className={this.state.searchFrom === 'ip' ? 'selected' : null}>
-                            Seach By IP
-                          </MenuItem>
-                        </DropdownButton>
-                      </ButtonToolbar>
-
-                      <div style={{ width: 270,float: 'left', marginLeft: 10 }}>
-                        {this._getSeachFromSelector()}
-                      </div>
                     </div>
                     <div className="col-md-6" style={{ width: '30%' }}>
                       <div className="saved-searches-selector-container pull-right"
