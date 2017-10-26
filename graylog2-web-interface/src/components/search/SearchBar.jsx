@@ -5,6 +5,8 @@ import Immutable from 'immutable';
 import { Button, ButtonToolbar, DropdownButton, MenuItem, Alert } from 'react-bootstrap';
 import URI from 'urijs';
 
+import history from 'util/History';
+
 import { Input } from 'components/bootstrap';
 import { DatePicker, Select } from 'components/common';
 import { RefreshControls, QueryInput } from 'components/search';
@@ -31,6 +33,7 @@ const SearchBar = React.createClass({
     config: React.PropTypes.object,
     displayRefreshControls: React.PropTypes.bool,
     onExecuteSearch: React.PropTypes.func,
+    router: React.PropTypes.object,
   },
 
   getDefaultProps() {
@@ -41,6 +44,7 @@ const SearchBar = React.createClass({
 
   getInitialState() {
     this.initialSearchParams = SearchStore.getParams();
+
     return {
       rangeType: this.initialSearchParams.rangeType,
       rangeParams: this.initialSearchParams.rangeParams,
@@ -49,20 +53,22 @@ const SearchBar = React.createClass({
       keywordPreview: Immutable.Map(),
       searchFrom:"group",
       streams:undefined,
+      chosenGroup:SearchStore.searchInStream ? SearchStore.searchInStream.title.substr(7) : undefined,
+      chosenIP:undefined,
     };
   },
   componentDidMount() {
+    StreamsStore.load((streams) => {
+      this.setState({
+        streams: streams,
+      });
+    });
     SearchStore.onParamsChanged = newParams => this.setState(newParams);
     SearchStore.onSubmitSearch = () => {
       this._performSearch();
     };
     SearchStore.onAddQueryTerm = this._animateQueryChange;
     this._initializeSearchQueryInput();
-    StreamsStore.load((streams) => {
-      this.setState({
-        streams: streams,
-      });
-    });
   },
   componentDidUpdate(prevProps, prevState) {
     if (this.state.query !== prevState.query) {
@@ -74,6 +80,11 @@ const SearchBar = React.createClass({
   },
   reload() {
     this.setState(this.getInitialState());
+    StreamsStore.load((streams) => {
+      this.setState({
+        streams: streams,
+      });
+    });
   },
   _initializeSearchQueryInput() {
     if (this.props.userPreferences.enableSmartSearch) {
@@ -232,9 +243,6 @@ const SearchBar = React.createClass({
     const streamId = SearchStore.searchInStream ? SearchStore.searchInStream.id : undefined;
     SavedSearchesActions.execute.triggerPromise(searchId, streamId, $(window).width());
   },
-  _onGroupSelect(group) {
-    console.log(group);
-  },
 
   _onDateSelected(field) {
     return (date, _, event) => {
@@ -391,9 +399,17 @@ const SearchBar = React.createClass({
   },
 
   _formatGroup(group){
-    if (group.title.startsWith("_Group:")){
+    if (group.title.startsWith("_Group:") && !group.disabled){
       group.title = group.title.substr(7);
       return group;
+    }
+  },
+
+  _onGroupSelect(stream_id) {
+    if (stream_id === ''){
+      history.push("/search");
+    }else{
+      history.push("/streams/"+stream_id+"/search");
     }
   },
 
@@ -412,7 +428,7 @@ const SearchBar = React.createClass({
             return { value: group.id, label: group.title };
           });
         selector = (
-          <Select placeholder="search from groups" options={formattedGroups} value={this.state.streams}
+          <Select placeholder="search from groups" options={formattedGroups} value={this.state.chosenGroup}
                   onValueChange={this._onGroupSelect} size="small" />
         );
         break;
