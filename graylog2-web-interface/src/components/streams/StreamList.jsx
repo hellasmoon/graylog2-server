@@ -26,24 +26,37 @@ const StreamList = React.createClass({
     );
   },
 
+  _filterStream(stream){
+    if (!stream.title.startsWith("_Group:") && !stream.title.startsWith("_IP:")){
+      return stream;
+    }
+  },
+
   _sortByTitle(stream1, stream2) {
     return stream1.title.localeCompare(stream2.title);
   },
 
   render() {
     if (this.props.streams.length > 0) {
-      const streamList = this.props.streams.sort(this._sortByTitle).map(this._formatStream);
+      const streamList = this.props.streams.sort(this._sortByTitle).filter(this._filterStream).map(this._formatStream);
 
+      if (streamList.length > 0){
+        return (
+          <ul className="streams">
+            {streamList}
+          </ul>
+        );
+      }
       return (
-        <ul className="streams">
-          {streamList}
-        </ul>
+        <Alert bsStyle="info">
+          <i className="fa fa-info-circle" />&nbsp;No streams match your search filter.
+        </Alert>
       );
     }
     return (
       <Alert bsStyle="info">
         <i className="fa fa-info-circle" />&nbsp;No streams match your search filter.
-        </Alert>
+      </Alert>
     );
   },
 });
