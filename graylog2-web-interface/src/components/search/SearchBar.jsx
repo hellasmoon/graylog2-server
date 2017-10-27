@@ -448,7 +448,7 @@ const SearchBar = React.createClass({
           });
         selector = (
           <Select placeholder="search from IP address" options={formattedIPs} value={this.state.chosenIP}
-                  onValueChange={this._onGroupSelect} size="small" />
+                  onValueChange={this._onGroupSelect} size="small" className="input-sm" />
         );
         break;
     }
@@ -476,27 +476,8 @@ const SearchBar = React.createClass({
                 <div className="timerange-selector-container">
                   <div className="row no-bm">
                     <div className="col-md-6" style={{ width: '70%' }}>
+
                       <ButtonToolbar className="timerange-chooser pull-left">
-                        <DropdownButton bsStyle="info"
-                                        title={<i className="fa fa-share-alt-square" />}
-                                        onSelect={this._searchFromChanged}
-                                        id="dropdown-timerange-selector">
-                          <MenuItem eventKey="group"
-                                    className={this.state.searchFrom === 'group' ? 'selected' : null}>
-                            Seach By Group
-                          </MenuItem>
-                          <MenuItem eventKey="ip"
-                                    className={this.state.searchFrom === 'ip' ? 'selected' : null}>
-                            Seach By IP
-                          </MenuItem>
-                        </DropdownButton>
-                      </ButtonToolbar>
-
-                      <div style={{ width: 270,float: 'left', marginLeft: 10 }}>
-                        {this._getSeachFromSelector()}
-                      </div>
-
-                      <ButtonToolbar className="timerange-chooser pull-left" style={{ marginLeft: 10 }}>
                         <DropdownButton bsStyle="info"
                                         title={<i className="fa fa-clock-o " />}
                                         onSelect={this._rangeTypeChanged}
@@ -536,17 +517,29 @@ const SearchBar = React.createClass({
                 </div>
 
                 <div id="search-container">
+
+                  <Button type="button" disabled bsStyle="info"  style={{float: 'left', opacity: 1}}>
+                    <i className="fa fa-sitemap" />
+                  </Button>
+
+                  <div style={{ width: 270,float: 'left', marginLeft: 10 }}>
+                    {this._getSeachFromSelector()}
+                  </div>
+                  <div style={{ width: 270,float: 'left', marginLeft: 10 }}>
+                    {this._getSeachFromSelector()}
+                  </div>
+
                   <div className="pull-right search-help">
                     <DocumentationLink page={DocsHelper.PAGES.SEARCH_QUERY_LANGUAGE}
                                        title="Search query syntax documentation"
                                        text={<i className="fa fa-lightbulb-o" />} />
                   </div>
 
-                  <Button type="submit" bsStyle="success" className="pull-left">
+                  <Button type="submit" bsStyle="success" className="pull-left" style={{ marginLeft:'10px'}}>
                     <i className="fa fa-search" />
                   </Button>
 
-                  <div className="query">
+                  <div className="query" style={{ marginLeft:'660px'}}>
                     <Input type="text"
                            ref="query"
                            name="q"
