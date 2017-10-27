@@ -199,7 +199,15 @@ const SearchSidebar = React.createClass({
       <MenuItem key="export" onSelect={this._openModal(this.exportModal)}>Export as CSV</MenuItem>,
     ];
     if (this.props.searchInStream) {
-      searchTitle = <span>{this.props.searchInStream.title}</span>;
+      const title = this.props.searchInStream.title;
+      if (title.startsWith("_Group:")){
+        searchTitle = <span>{title.substr(7)}</span>;
+      }else if(title.startsWith("_IP:")){
+        searchTitle = <span>{title.substr(4)}</span>;
+      }else {
+        searchTitle = <span>{this.props.searchInStream.title}</span>;
+      }
+
       // TODO: add stream actions to dropdown
     } else {
       searchTitle = <span>Search result</span>;

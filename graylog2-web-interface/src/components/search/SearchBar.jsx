@@ -434,7 +434,7 @@ const SearchBar = React.createClass({
             return { value: group.id, label: group.title.substr(7) };
           });
         selector = (
-          <Select placeholder="search from groups" options={formattedGroups} value={this.state.chosenGroup}
+          <Select placeholder="search from a group" options={formattedGroups} value={this.state.chosenGroup}
                   onValueChange={this._onGroupSelect} size="small" />
         );
         break;
@@ -447,7 +447,7 @@ const SearchBar = React.createClass({
             return { value: ip.id, label: ip.title.substr(4) };
           });
         selector = (
-          <Select placeholder="search from groups" options={formattedIPs} value={this.state.chosenIP}
+          <Select placeholder="search from IP address" options={formattedIPs} value={this.state.chosenIP}
                   onValueChange={this._onGroupSelect} size="small" />
         );
         break;

@@ -36,7 +36,15 @@ const NoSearchResults = React.createClass({
   render() {
     let streamDescription = null;
     if (this.props.searchInStream) {
-      streamDescription = <span>in stream <em>{this.props.searchInStream.title}</em></span>;
+      const title = this.props.searchInStream.title;
+      if (title.startsWith("_Group:")){
+        streamDescription = <span>in Group <em>{title.substr(7)}</em></span>;
+      }else if(title.startsWith("_IP:")){
+        streamDescription = <span>in IP <em>{title.substr(4)}</em></span>;
+      }else {
+        streamDescription = <span>in stream <em>{this.props.searchInStream.title}</em></span>;
+      }
+
     }
 
     return (
