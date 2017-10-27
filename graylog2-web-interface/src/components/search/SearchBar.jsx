@@ -399,9 +399,15 @@ const SearchBar = React.createClass({
     );
   },
 
-  _formatGroup(group){
-    if (group.title.startsWith("_Group:") && !group.disabled){
-      return group;
+  _formatGroup(stream){
+    if (stream.title.startsWith("_Group:") && !stream.disabled){
+      return stream;
+    }
+  },
+
+  _formatIP(stream){
+    if (stream.title.startsWith("_IP:") && !stream.disabled){
+      return stream;
     }
   },
 
@@ -433,8 +439,16 @@ const SearchBar = React.createClass({
         );
         break;
       case 'ip':
+        const ips = this.state.streams
+          .sort((streamA, streamB) => streamA.title.toLowerCase().localeCompare(streamB.title.toLowerCase()))
+          .filter(this._formatIP);
+        const formattedIPs = ips
+          .map((ip) => {
+            return { value: ip.id, label: ip.title.substr(4) };
+          });
         selector = (
-          <Spinner />
+          <Select placeholder="search from groups" options={formattedIPs} value={this.state.chosenIP}
+                  onValueChange={this._onGroupSelect} size="small" />
         );
         break;
     }
