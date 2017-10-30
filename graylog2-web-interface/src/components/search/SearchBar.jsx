@@ -54,8 +54,9 @@ const SearchBar = React.createClass({
       keywordPreview: Immutable.Map(),
       searchFrom: SearchStore.searchInStream ? (SearchStore.searchInStream.title.startsWith("_IP:") ? "ip" : "group") : "group",
       streams: undefined,
-      chosenGroup: SearchStore.searchInStream ? (SearchStore.searchInStream.title.startsWith("_Group:") ? SearchStore.searchInStream.title.substr(7) : undefined) : undefined,
-      chosenIP: SearchStore.searchInStream ? (SearchStore.searchInStream.title.startsWith("_IP:") ? SearchStore.searchInStream.title.substr(4) : undefined) : undefined,
+      chosenGroup: SearchStore.searchInStream ? this._loadChosenGroup() : undefined,
+      chosenIP: SearchStore.searchInStream ? this._loadChosenIP() : undefined,
+      chosenGroupId: SearchStore.searchInStream ? this._loadChosenGroupId() : undefined,
     };
   },
   componentDidMount() {
@@ -70,6 +71,7 @@ const SearchBar = React.createClass({
     };
     SearchStore.onAddQueryTerm = this._animateQueryChange;
     this._initializeSearchQueryInput();
+
   },
   componentDidUpdate(prevProps, prevState) {
     if (this.state.query !== prevState.query) {
@@ -86,6 +88,36 @@ const SearchBar = React.createClass({
         streams: streams,
       });
     });
+  },
+  _loadChosenGroup() {
+    const group = SearchStore.searchInStream;
+    if (!group){
+      return undefined;
+    }
+    if (group.title.startsWith("_Group:")){
+      return group.title.substr(7);
+    }
+    return undefined;
+  },
+  _loadChosenGroupId(){
+    const group = SearchStore.searchInStream;
+    if (!group){
+      return undefined;
+    }
+    if (group.title.startsWith("_Group:")){
+      return group.id;
+    }
+    return undefined;
+  },
+  _loadChosenIP() {
+    const ip = SearchStore.searchInStream;
+    if (!ip){
+      return undefined;
+    }
+    if (ip.title.startsWith("_IP:")){
+      return ip.title.substr(4);
+    }
+    return undefined;
   },
   _initializeSearchQueryInput() {
     if (this.props.userPreferences.enableSmartSearch) {
@@ -407,7 +439,26 @@ const SearchBar = React.createClass({
 
   _formatIP(stream){
     if (stream.title.startsWith("_IP:") && !stream.disabled){
-      return stream;
+      if (this.state.chosenGroupId){
+        let streams = this.state.streams;
+        let selected;
+        for (let i = 0; i<streams.length; i++){
+          if (streams[i].id == this.state.chosenGroupId) {
+            selected = streams[i];
+            break;
+          }
+        }
+        console.log("selected:",selected);
+        for (let i = 0; i<selected.rules.length; i++){
+          console.log("stream_value:",stream.rules[0].value);
+          console.log("selected_value:",selected.rules[i].value);
+          if (stream.rules[0].value == selected.rules[i].value){
+            return stream;
+          }
+        }
+      }else {
+        return stream;
+      }
     }
   },
 
@@ -417,6 +468,44 @@ const SearchBar = React.createClass({
     }else{
       history.push(Routes.stream_search(stream_id));
     }
+  },
+
+  _getSearchFromGroupSelector(){
+    if (!this.state.streams){
+      return <Spinner />;
+    }
+    let selector;
+    const groups = this.state.streams
+      .sort((streamA, streamB) => streamA.title.toLowerCase().localeCompare(streamB.title.toLowerCase()))
+      .filter(this._formatGroup);
+    const formattedGroups = groups
+      .map((group) => {
+        return { value: group.id, label: group.title.substr(7) };
+      });
+    selector = (
+      <Select placeholder="search from a group" options={formattedGroups} value={this.state.chosenGroup}
+              onValueChange={this._onGroupSelect} size="small" />
+    );
+    return selector;
+  },
+
+  _getSearchFromIPSelector(){
+    if (!this.state.streams){
+      return <Spinner />;
+    }
+    let selector;
+    const ips = this.state.streams
+      .sort((streamA, streamB) => streamA.title.toLowerCase().localeCompare(streamB.title.toLowerCase()))
+      .filter(this._formatIP);
+    const formattedIPs = ips
+      .map((ip) => {
+        return { value: ip.id, label: ip.title.substr(4) };
+      });
+    selector = (
+      <Select placeholder="search from IP address" options={formattedIPs} value={this.state.chosenIP}
+              onValueChange={this._onGroupSelect} size="small" />
+    );
+    return selector;
   },
 
   _getSeachFromSelector() {
@@ -475,7 +564,7 @@ const SearchBar = React.createClass({
 
                 <div className="timerange-selector-container">
                   <div className="row no-bm">
-                    <div className="col-md-6" style={{ width: '70%' }}>
+                    <div className="col-md-6">
 
                       <ButtonToolbar className="timerange-chooser pull-left">
                         <DropdownButton bsStyle="info"
@@ -500,7 +589,7 @@ const SearchBar = React.createClass({
                       {this._getRangeTypeSelector()}
 
                     </div>
-                    <div className="col-md-6" style={{ width: '30%' }}>
+                    <div className="col-md-6">
                       <div className="saved-searches-selector-container pull-right"
                            style={{ display: 'inline-flex', marginRight: 5 }}>
                         {this.props.displayRefreshControls &&
@@ -522,11 +611,11 @@ const SearchBar = React.createClass({
                     <i className="fa fa-sitemap" />
                   </Button>
 
-                  <div style={{ width: 270,float: 'left', marginLeft: 10 }}>
-                    {this._getSeachFromSelector()}
+                  <div style={{ width: 270,float: 'left', marginLeft: 14 }}>
+                    {this._getSearchFromGroupSelector()}
                   </div>
-                  <div style={{ width: 270,float: 'left', marginLeft: 10 }}>
-                    {this._getSeachFromSelector()}
+                  <div style={{ width: 270,float: 'left', marginLeft: 14 }}>
+                    {this._getSearchFromIPSelector()}
                   </div>
 
                   <div className="pull-right search-help">
@@ -535,11 +624,11 @@ const SearchBar = React.createClass({
                                        text={<i className="fa fa-lightbulb-o" />} />
                   </div>
 
-                  <Button type="submit" bsStyle="success" className="pull-left" style={{ marginLeft:'10px'}}>
+                  <Button type="submit" bsStyle="success" className="pull-left" style={{ marginLeft: 14}}>
                     <i className="fa fa-search" />
                   </Button>
 
-                  <div className="query" style={{ marginLeft:'660px'}}>
+                  <div className="query" style={{ marginLeft:'666px'}}>
                     <Input type="text"
                            ref="query"
                            name="q"
