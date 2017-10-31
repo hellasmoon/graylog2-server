@@ -241,12 +241,14 @@ const UserForm = React.createClass({
                         <MultiSelect ref="streamReadOptions" placeholder="Choose streams read permissions..."
                                      options={this.formatMultiselectOptions(this.state.streams)}
                                      value={streamReadOptions}
+                                     disabled
                                      onChange={this._onPermissionsChange('streams', 'read')} />
                         <span className="help-block">Choose streams the user can <strong>view</strong>
                           . Removing read access will remove edit access, too.</span>
                         <MultiSelect ref="streamEditOptions" placeholder="Choose streams edit permissions..."
                                      options={this.formatMultiselectOptions(this.state.streams)}
                                      value={streamEditOptions}
+                                     disabled
                                      onChange={this._onPermissionsChange('streams', 'edit')} />
                         <span className="help-block">Choose the streams the user can <strong>edit</strong>
                           . Values chosen here will enable read access, too.</span>
@@ -258,12 +260,14 @@ const UserForm = React.createClass({
                         <MultiSelect ref="dashboardReadOptions" placeholder="Choose dashboards read permissions..."
                                      options={this.formatMultiselectOptions(this.state.dashboards)}
                                      value={dashboardReadOptions}
+                                     disabled
                                      onChange={this._onPermissionsChange('dashboards', 'read')} />
                         <span className="help-block">Choose dashboards the user can <strong>view</strong>
                           . Removing read access will remove edit access, too.</span>
                         <MultiSelect ref="dashboardEditOptions" placeholder="Choose dashboards edit permissions..."
                                      options={this.formatMultiselectOptions(this.state.dashboards)}
                                      value={dashboardEditOptions}
+                                     disabled
                                      onChange={this._onPermissionsChange('dashboards', 'edit')} />
                         <span className="help-block">Choose dashboards the user can <strong>edit</strong>
                           . Values chosen here will enable read access, too.</span>

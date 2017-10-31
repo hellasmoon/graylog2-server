@@ -32,6 +32,9 @@ const TableList = React.createClass({
       selected: Immutable.Set(),
     };
   },
+  componentWillReceiveProps(newProps) {
+    this.setState({ filteredItems: newProps.items });
+  },
   _filterItems(filteredItems) {
     this.setState({ filteredItems: Immutable.List(filteredItems), allSelected: false });
   },
