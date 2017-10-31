@@ -35,8 +35,6 @@ class SearchStore {
     onSubmitSearch: ()=>void;
     onAddQueryTerm: ()=>void;
     searchInStream: any;
-    public chosenGroup: any;
-    public chosenIP: any;
 
     constructor() {
         this.load(true);

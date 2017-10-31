@@ -35,6 +35,7 @@ const AppWithSearchBar = React.createClass({
       savedSearches: undefined,
       stream: undefined,
       searchesClusterConfig: undefined,
+      chosenGroupId:undefined,
     };
   },
   componentDidMount() {
@@ -80,6 +81,11 @@ const AppWithSearchBar = React.createClass({
   _onExecuteSearch() {
     this.setState({ forceFetch: true }, this._resetForceFetch);
   },
+  _changeChosenGroup(group){
+    this.setState({
+      chosenGroupId:group
+    });
+  },
   render() {
     if (this._isLoading()) {
       return <Spinner />;
@@ -95,6 +101,8 @@ const AppWithSearchBar = React.createClass({
                    savedSearches={this.state.savedSearches}
                    config={this.state.searchesClusterConfig}
                    displayRefreshControls={this._searchBarShouldDisplayRefreshControls()}
+                   changeChosenGroup = {this._changeChosenGroup}
+                   lastChosenGroupId = {this.state.chosenGroupId}
                    onExecuteSearch={this._onExecuteSearch} />
         <Row id="main-row">
           <Col md={12} id="main-content">

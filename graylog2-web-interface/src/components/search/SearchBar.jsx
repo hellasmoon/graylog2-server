@@ -35,6 +35,8 @@ const SearchBar = React.createClass({
     displayRefreshControls: React.PropTypes.bool,
     onExecuteSearch: React.PropTypes.func,
     router: React.PropTypes.object,
+    changeChosenGroup:React.PropTypes.func,
+    lastChosenGroupId: React.PropTypes.string,
   },
 
   getDefaultProps() {
@@ -54,7 +56,6 @@ const SearchBar = React.createClass({
       keywordPreview: Immutable.Map(),
       searchFrom: SearchStore.searchInStream ? (SearchStore.searchInStream.title.startsWith("_IP:") ? "ip" : "group") : "group",
       streams: undefined,
-      chosenGroup: SearchStore.searchInStream ? this._loadChosenGroup() : undefined,
       chosenIP: SearchStore.searchInStream ? this._loadChosenIP() : undefined,
       chosenGroupId: SearchStore.searchInStream ? this._loadChosenGroupId() : undefined,
     };
@@ -71,7 +72,6 @@ const SearchBar = React.createClass({
     };
     SearchStore.onAddQueryTerm = this._animateQueryChange;
     this._initializeSearchQueryInput();
-
   },
   componentDidUpdate(prevProps, prevState) {
     if (this.state.query !== prevState.query) {
@@ -89,20 +89,15 @@ const SearchBar = React.createClass({
       });
     });
   },
-  _loadChosenGroup() {
-    const group = SearchStore.searchInStream;
-    if (!group){
-      return undefined;
-    }
-    if (group.title.startsWith("_Group:")){
-      return group.title.substr(7);
-    }
-    return undefined;
-  },
   _loadChosenGroupId(){
     const group = SearchStore.searchInStream;
     if (!group){
       return undefined;
+    }
+    if (group.title.startsWith("_IP:")){
+      if (this.props.lastChosenGroupId){
+        return this.props.lastChosenGroupId;
+      }
     }
     if (group.title.startsWith("_Group:")){
       return group.id;
@@ -448,10 +443,7 @@ const SearchBar = React.createClass({
             break;
           }
         }
-        console.log("selected:",selected);
         for (let i = 0; i<selected.rules.length; i++){
-          console.log("stream_value:",stream.rules[0].value);
-          console.log("selected_value:",selected.rules[i].value);
           if (stream.rules[0].value == selected.rules[i].value){
             return stream;
           }
@@ -464,8 +456,26 @@ const SearchBar = React.createClass({
 
   _onGroupSelect(stream_id) {
     if (stream_id === ''){
+      this.props.changeChosenGroup(undefined);
       history.push(Routes.search());
     }else{
+      this.props.changeChosenGroup(stream_id);
+      history.push(Routes.stream_search(stream_id));
+    }
+  },
+
+  _onIPSelect(stream_id) {
+    if (stream_id === ''){
+      if (this.props.lastChosenGroupId){
+        this.props.changeChosenGroup(this.props.lastChosenGroupId);
+        history.push(Routes.stream_search(this.props.lastChosenGroupId));
+      }else {
+        this.props.changeChosenGroup(undefined);
+        history.push(Routes.search());
+      }
+
+    }else{
+      this.props.changeChosenGroup(this.props.lastChosenGroupId);
       history.push(Routes.stream_search(stream_id));
     }
   },
@@ -473,6 +483,16 @@ const SearchBar = React.createClass({
   _getSearchFromGroupSelector(){
     if (!this.state.streams){
       return <Spinner />;
+    }
+    let selected = undefined;
+    let streams = this.state.streams;
+    if (this.state.chosenGroupId){
+      for (let i = 0; i<streams.length; i++){
+        if (streams[i].id == this.state.chosenGroupId){
+          selected = streams[i].title.substr(7);
+          break;
+        }
+      }
     }
     let selector;
     const groups = this.state.streams
@@ -483,7 +503,7 @@ const SearchBar = React.createClass({
         return { value: group.id, label: group.title.substr(7) };
       });
     selector = (
-      <Select placeholder="search from a group" options={formattedGroups} value={this.state.chosenGroup}
+      <Select placeholder="search from a group" options={formattedGroups} value={selected}
               onValueChange={this._onGroupSelect} size="small" />
     );
     return selector;
@@ -503,47 +523,9 @@ const SearchBar = React.createClass({
       });
     selector = (
       <Select placeholder="search from IP address" options={formattedIPs} value={this.state.chosenIP}
-              onValueChange={this._onGroupSelect} size="small" />
+              onValueChange={this._onIPSelect} size="small" />
     );
     return selector;
-  },
-
-  _getSeachFromSelector() {
-    if (!this.state.streams){
-      return <Spinner />;
-    }
-    let selector;
-    switch (this.state.searchFrom) {
-      case 'group':
-        const groups = this.state.streams
-          .sort((streamA, streamB) => streamA.title.toLowerCase().localeCompare(streamB.title.toLowerCase()))
-          .filter(this._formatGroup);
-        const formattedGroups = groups
-          .map((group) => {
-            return { value: group.id, label: group.title.substr(7) };
-          });
-        selector = (
-          <Select placeholder="search from a group" options={formattedGroups} value={this.state.chosenGroup}
-                  onValueChange={this._onGroupSelect} size="small" />
-        );
-        break;
-      case 'ip':
-        const ips = this.state.streams
-          .sort((streamA, streamB) => streamA.title.toLowerCase().localeCompare(streamB.title.toLowerCase()))
-          .filter(this._formatIP);
-        const formattedIPs = ips
-          .map((ip) => {
-            return { value: ip.id, label: ip.title.substr(4) };
-          });
-        selector = (
-          <Select placeholder="search from IP address" options={formattedIPs} value={this.state.chosenIP}
-                  onValueChange={this._onGroupSelect} size="small" className="input-sm" />
-        );
-        break;
-    }
-
-    return selector;
-
   },
 
   render() {
