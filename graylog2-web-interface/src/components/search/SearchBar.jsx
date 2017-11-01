@@ -37,6 +37,7 @@ const SearchBar = React.createClass({
     router: React.PropTypes.object,
     changeChosenGroup:React.PropTypes.func,
     lastChosenGroupId: React.PropTypes.string,
+    streams: React.PropTypes.object.isRequired,
   },
 
   getDefaultProps() {
@@ -55,17 +56,11 @@ const SearchBar = React.createClass({
       savedSearch: SearchStore.savedSearch,
       keywordPreview: Immutable.Map(),
       searchFrom: SearchStore.searchInStream ? (SearchStore.searchInStream.title.startsWith("_IP:") ? "ip" : "group") : "group",
-      streams: undefined,
       chosenIP: SearchStore.searchInStream ? this._loadChosenIP() : undefined,
       chosenGroupId: SearchStore.searchInStream ? this._loadChosenGroupId() : undefined,
     };
   },
   componentDidMount() {
-    StreamsStore.load((streams) => {
-      this.setState({
-        streams: streams,
-      });
-    });
     SearchStore.onParamsChanged = newParams => this.setState(newParams);
     SearchStore.onSubmitSearch = () => {
       this._performSearch();
@@ -435,7 +430,7 @@ const SearchBar = React.createClass({
   _formatIP(stream){
     if (stream.title.startsWith("_IP:") && !stream.disabled){
       if (this.state.chosenGroupId){
-        let streams = this.state.streams;
+        let streams = this.props.streams;
         let selected;
         for (let i = 0; i<streams.length; i++){
           if (streams[i].id == this.state.chosenGroupId) {
@@ -481,11 +476,8 @@ const SearchBar = React.createClass({
   },
 
   _getSearchFromGroupSelector(){
-    if (!this.state.streams){
-      return <Spinner />;
-    }
     let selected = undefined;
-    let streams = this.state.streams;
+    let streams = this.props.streams;
     if (this.state.chosenGroupId){
       for (let i = 0; i<streams.length; i++){
         if (streams[i].id == this.state.chosenGroupId){
@@ -495,7 +487,7 @@ const SearchBar = React.createClass({
       }
     }
     let selector;
-    const groups = this.state.streams
+    const groups = this.props.streams
       .sort((streamA, streamB) => streamA.title.toLowerCase().localeCompare(streamB.title.toLowerCase()))
       .filter(this._formatGroup);
     const formattedGroups = groups
@@ -510,11 +502,8 @@ const SearchBar = React.createClass({
   },
 
   _getSearchFromIPSelector(){
-    if (!this.state.streams){
-      return <Spinner />;
-    }
     let selector;
-    const ips = this.state.streams
+    const ips = this.props.streams
       .sort((streamA, streamB) => streamA.title.toLowerCase().localeCompare(streamB.title.toLowerCase()))
       .filter(this._formatIP);
     const formattedIPs = ips

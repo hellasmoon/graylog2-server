@@ -36,9 +36,15 @@ const AppWithSearchBar = React.createClass({
       stream: undefined,
       searchesClusterConfig: undefined,
       chosenGroupId:undefined,
+      streams: undefined,
     };
   },
   componentDidMount() {
+    StreamsStore.load((streams) => {
+      this.setState({
+        streams: streams,
+      });
+    });
     SavedSearchesActions.list.triggerPromise();
     ConfigurationActions.listSearchesClusterConfig();
     this._loadStream(this.props.params.streamId);
@@ -67,7 +73,7 @@ const AppWithSearchBar = React.createClass({
     }
   },
   _isLoading() {
-    return !this.state.savedSearches || !this.state.searchesClusterConfig || (this.props.params.streamId && !this.state.stream);
+    return !this.state.savedSearches || !this.state.searchesClusterConfig || (this.props.params.streamId && !this.state.stream || !this.state.streams);
   },
   _decorateChildren(children) {
     return React.Children.map(children, (child) => {
@@ -103,6 +109,7 @@ const AppWithSearchBar = React.createClass({
                    displayRefreshControls={this._searchBarShouldDisplayRefreshControls()}
                    changeChosenGroup = {this._changeChosenGroup}
                    lastChosenGroupId = {this.state.chosenGroupId}
+                   streams = {this.state.streams}
                    onExecuteSearch={this._onExecuteSearch} />
         <Row id="main-row">
           <Col md={12} id="main-content">
