@@ -131,12 +131,24 @@ const MessageDetail = React.createClass({
 
     let surroundingSearchButton;
     if (!this.props.disableSurroundingSearch) {
-      surroundingSearchButton = (
-        <SurroundingSearchButton id={this.props.message.id}
-                                 timestamp={this.props.message.timestamp}
-                                 searchConfig={this.props.searchConfig}
-                                 messageFields={this.props.message.fields} />
-      );
+      if (this.props.allStreams){
+        surroundingSearchButton = (
+          <SurroundingSearchButton id={this.props.message.id}
+                                   timestamp={this.props.message.timestamp}
+                                   searchConfig={this.props.searchConfig}
+                                   allStreams={this.props.allStreams}
+                                   messageFields={this.props.message.fields} />
+        );
+      }else {
+        surroundingSearchButton = (
+          <SurroundingSearchButton id={this.props.message.id}
+                                   timestamp={this.props.message.timestamp}
+                                   searchConfig={this.props.searchConfig}
+                                   allStreams={this.state.allStreams}
+                                   messageFields={this.props.message.fields} />
+        );
+      }
+
     }
 
     let showChanges = null;

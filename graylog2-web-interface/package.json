@@ -54,7 +54,8 @@
     "toastr": "^2.1.2",
     "typeahead.js": "^0.11.1",
     "ua-parser-js": "^0.7.12",
-    "urijs": "^1.17.0"
+    "urijs": "^1.17.0",
+    "@ezetech/react-multi-level-menu-component": "^0.0.3"
   },
   "devDependencies": {
     "assets-webpack-plugin": "^3.5.1",
@@ -95,6 +96,7 @@
     "url-loader": "^0.5.6",
     "webpack": "^2.2.0",
     "webpack-dev-server": "^2.2.0",
-    "webpack-merge": "^0.x.x"
+    "webpack-merge": "^0.x.x",
+    "@ezetech/react-multi-level-menu-component": "^0.0.3"
   }
 }

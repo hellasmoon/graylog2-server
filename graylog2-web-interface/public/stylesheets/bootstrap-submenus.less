@@ -64,3 +64,29 @@
   margin-left: 10px;
   right: 98%;
 }
+
+.context-menu {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: flex-start;
+  box-sizing: border-box;
+  white-space: nowrap;
+  font: 14px Avenir;
+  z-index: 100;
+}
+
+.context-menu-item {
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.context-menu-item-triangle {
+  transform: translateX(6px)  translateY(2px);
+}
+
+.context-menu-item-triangle path {
+  fill: white;
+  border: white;
+}
