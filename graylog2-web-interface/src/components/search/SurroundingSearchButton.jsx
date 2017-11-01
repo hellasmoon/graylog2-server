@@ -19,6 +19,12 @@ const SurroundingSearchButton = React.createClass({
     messageFields: React.PropTypes.object.isRequired,
   },
 
+  getInitialState() {
+    return {
+      menuShown: false
+    };
+  },
+
   _buildTimeRangeOptions(searchConfig) {
     const options = {};
 
@@ -70,7 +76,7 @@ const SurroundingSearchButton = React.createClass({
           group.push(rule.value);
         })
       });
-      if (streams.length > 0){
+      if (group.length > 0){
         return SearchStore.searchSurroundingMessagesByGroup(this.props.id, fromTime, toTime, group);
       }else{
         const fields = {};
@@ -84,7 +90,6 @@ const SurroundingSearchButton = React.createClass({
     }else {
       return SearchStore.searchSurroundingMessages(this.props.id, fromTime, toTime, this._buildFilterFields());
     }
-
   },
 
   _clickItemCallback(name){
@@ -96,22 +101,20 @@ const SurroundingSearchButton = React.createClass({
     const searchLink = this._searchLinkByType(key, type);
     console.log(searchLink);
     history.push(searchLink);
-
   },
+
+  _toggleMenu() {
+    this.setState({menuShown: !this.state.menuShown});
+  },
+
+  _closeMenu(e){
+    e.preventDefault();
+    this.setState({menuShown: false});
+  },
+
 
   render() {
     const timeRangeOptions = this._buildTimeRangeOptions(this.props.searchConfig);
-    const menuItems = Object.keys(timeRangeOptions)
-      .sort((a, b) => naturalSort(a, b))
-      .map((key, idx) => {
-        return (
-          <MenuItem key={idx} href={this._searchLink(key)}>{timeRangeOptions[key]}</MenuItem>
-        );
-      });
-    {/*<DropdownButton title="Show surrounding messages" bsSize="small" id="surrounding-search-dropdown">*/}
-    {/*{menuItems}*/}
-    {/*</DropdownButton>*/}
-
     const menu = Object.keys(timeRangeOptions)
       .sort((a, b) => naturalSort(a, b))
       .map((key, idx) => {
@@ -127,6 +130,10 @@ const SurroundingSearchButton = React.createClass({
               {
                 name: key+"|"+"ip",
                 text: "search by IP"
+              },
+              {
+                name: key+"|"+"origin",
+                text: "search by source"
               }
             ]
           }
@@ -134,19 +141,21 @@ const SurroundingSearchButton = React.createClass({
       });
 
     return (
-      <DropdownButton title="Show surrounding messages" bsSize="small" id="surrounding-search-dropdown">
-        <li style={{display:"block"}}>
-          <MenuList
-            listClass="context-menu"
-            itemClass="context-menu-item"
-            triangleClassName="context-menu-item-triangle"
-            position={{ top: "100%", left: "10%" }}
-            clickItemCallback={this._clickItemCallback}
-            show
-            items={menu}
-          />
-        </li>
-      </DropdownButton>
+      <div className="dropdown btn-group btn-group-sm" onMouseLeave={this._closeMenu}>
+        <button className="btn btn-default dropdown-toggle" type="button" onClick={this._toggleMenu}>
+          show surrounding message
+          <span className="caret">&nbsp;</span>
+        </button>
+
+        <MenuList
+          listClass="context-menu"
+          itemClass="context-menu-item"
+          triangleClassName="context-menu-item-triangle"
+          clickItemCallback={this._clickItemCallback}
+          show={this.state.menuShown}
+          items={menu}
+        />
+      </div>
     );
   },
 });

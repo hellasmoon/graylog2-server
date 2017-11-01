@@ -73,13 +73,29 @@
   align-content: flex-start;
   box-sizing: border-box;
   white-space: nowrap;
-  font: 14px Avenir;
+  font-size: 14px;
   z-index: 100;
+  background-color: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius:4px;
+  -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+  background-clip: padding-box;
+  min-width: 140px;
+  left: 0;
+  right: auto;
+  top: 100%;
 }
 
 .context-menu-item {
   box-sizing: border-box;
   cursor: pointer;
+  padding: 3px 20px;
+  white-space: nowrap;
+}
+
+.context-menu-item:hover {
+  background-color: #F1F2F2;
 }
 
 .context-menu-item-triangle {
@@ -87,6 +103,6 @@
 }
 
 .context-menu-item-triangle path {
-  fill: white;
+  fill: black;
   border: white;
 }
