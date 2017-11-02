@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Reflux from 'reflux';
 import Immutable from 'immutable';
 import { Button, ButtonToolbar, DropdownButton, MenuItem, Alert } from 'react-bootstrap';
 import URI from 'urijs';
@@ -17,9 +18,11 @@ import StoreProvider from 'injection/StoreProvider';
 const SearchStore = StoreProvider.getStore('Search');
 const ToolsStore = StoreProvider.getStore('Tools');
 const StreamsStore = StoreProvider.getStore('Streams');
+const FullScreenStore = StoreProvider.getStore('FullScreen');
 
 import ActionsProvider from 'injection/ActionsProvider';
 const SavedSearchesActions = ActionsProvider.getActions('SavedSearches');
+const FullScreenActions = ActionsProvider.getActions('FullScreen');
 
 import UIUtils from 'util/UIUtils';
 
@@ -39,7 +42,7 @@ const SearchBar = React.createClass({
     lastChosenGroupId: React.PropTypes.string,
     streams: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
   },
-
+  mixins: [Reflux.connect(FullScreenStore, "fullScreen")],
   getDefaultProps() {
     return {
       displayRefreshControls: true,
@@ -58,6 +61,7 @@ const SearchBar = React.createClass({
       searchFrom: SearchStore.searchInStream ? (SearchStore.searchInStream.title.startsWith("_IP:") ? "ip" : "group") : "group",
       chosenIP: SearchStore.searchInStream ? this._loadChosenIP() : undefined,
       chosenGroupId: SearchStore.searchInStream ? this._loadChosenGroupId() : undefined,
+      fullScreen: false,
     };
   },
   componentDidMount() {
@@ -518,8 +522,14 @@ const SearchBar = React.createClass({
   },
 
   render() {
+    let disappear;
+    if (this.state.fullScreen){
+      disappear = {display:"none"};
+    }else {
+      disappear = {};
+    }
     return (
-      <div className="row no-bm">
+      <div className="row no-bm" style={disappear}>
         <div className="col-md-12" id="universalsearch-container">
           <div className="row no-bm">
             <div ref="universalSearch" className="col-md-12" id="universalsearch">

@@ -1,12 +1,14 @@
 import React from 'react';
 import Immutable from 'immutable';
 import { Col, Row } from 'react-bootstrap';
+import Reflux from 'reflux';
 
 import { LoadingIndicator } from 'components/common';
 import { LegacyHistogram, NoSearchResults, ResultTable, SearchSidebar } from 'components/search';
 
 import StoreProvider from 'injection/StoreProvider';
 const SearchStore = StoreProvider.getStore('Search');
+const FullScreenStore = StoreProvider.getStore('FullScreen');
 
 import { PluginStore } from 'graylog-web-plugin/plugin';
 import {} from 'components/field-analyzers'; // Make sure to load all field analyzer plugins!
@@ -27,6 +29,7 @@ const SearchResult = React.createClass({
     loadingSearch: React.PropTypes.bool,
     forceFetch: React.PropTypes.bool,
   },
+  mixins: [Reflux.connect(FullScreenStore, "fullScreen")],
 
   getDefaultProps() {
     return {
@@ -46,6 +49,7 @@ const SearchResult = React.createClass({
       showAllFields: false,
       shouldHighlight: true,
       savedSearch: SearchStore.savedSearch,
+      fullScreen:false,
     };
   },
 
@@ -160,6 +164,35 @@ const SearchResult = React.createClass({
   },
 
   render() {
+    let disappear;
+    let mdValue = 9;
+    let legacyGraph;
+    let before;
+    let after;
+    if (this.state.fullScreen){
+      disappear = {display:"none"};
+      mdValue = 12;
+      legacyGraph = (undefined);
+      before = (undefined);
+      after = (undefined);
+    }else {
+      disappear = {};
+      mdValue = 9;
+      legacyGraph = (
+        <LegacyHistogram formattedHistogram={this.props.formattedHistogram}
+                         histogram={this.props.histogram}
+                         permissions={this.props.permissions}
+                         stream={this.props.searchInStream} />
+      );
+      before = (
+        this._fieldAnalyzerComponents(analyzer => this._shouldRenderAboveHistogram(analyzer))
+      );
+      after = (
+        this._fieldAnalyzerComponents(analyzer => this._shouldRenderBelowHistogram(analyzer))
+      );
+    }
+
+
     const anyHighlightRanges = Immutable.fromJS(this.props.result.messages).some(message => message.get('highlight_ranges') !== null);
 
     let loadingIndicator;
@@ -180,7 +213,7 @@ const SearchResult = React.createClass({
 
     return (
       <Row id="main-content-search">
-        <Col ref="opa" md={3} sm={12} id="sidebar">
+        <Col ref="opa" md={3} sm={12} id="sidebar" style={disappear}>
           <SearchSidebar result={this.props.result}
                          builtQuery={this.props.builtQuery}
                          selectedFields={this.state.selectedFields}
@@ -200,15 +233,12 @@ const SearchResult = React.createClass({
                          loadingSearch={this.props.loadingSearch}
           />
         </Col>
-        <Col md={9} sm={12} id="main-content-sidebar">
-          {this._fieldAnalyzerComponents(analyzer => this._shouldRenderAboveHistogram(analyzer))}
+        <Col md={mdValue} sm={12} id="main-content-sidebar">
+          {before}
 
-          <LegacyHistogram formattedHistogram={this.props.formattedHistogram}
-                           histogram={this.props.histogram}
-                           permissions={this.props.permissions}
-                           stream={this.props.searchInStream} />
+          {legacyGraph}
 
-          {this._fieldAnalyzerComponents(analyzer => this._shouldRenderBelowHistogram(analyzer))}
+          {after}
 
           <ResultTable messages={this.props.result.messages}
                        page={SearchStore.page}

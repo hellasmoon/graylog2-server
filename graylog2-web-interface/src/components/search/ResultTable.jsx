@@ -1,13 +1,16 @@
 import React from 'react';
+import Reflux from 'reflux';
 import { Button, ButtonGroup } from 'react-bootstrap';
 import Immutable from 'immutable';
 
 import StoreProvider from 'injection/StoreProvider';
 const StreamsStore = StoreProvider.getStore('Streams');
 const SearchStore = StoreProvider.getStore('Search');
+const FullScreenStore = StoreProvider.getStore('FullScreen');
 
 import ActionsProvider from 'injection/ActionsProvider';
 const RefreshActions = ActionsProvider.getActions('Refresh');
+const FullScreenActions = ActionsProvider.getActions('FullScreen');
 
 import { MessageTableEntry, MessageTablePaginator } from 'components/search';
 
@@ -25,12 +28,14 @@ const ResultTable = React.createClass({
     streams: React.PropTypes.object.isRequired,
     searchConfig: React.PropTypes.object.isRequired,
   },
+  mixins: [Reflux.connect(FullScreenStore, "fullScreen")],
   getInitialState() {
     return {
       expandedMessages: Immutable.Set(),
       allStreamsLoaded: false,
       allStreams: Immutable.List(),
       expandAllRenderAsync: false,
+      fullScreen:false,
     };
   },
   componentDidMount() {
@@ -125,6 +130,10 @@ const ResultTable = React.createClass({
     return <span>{sortLinks}</span>;
   },
 
+  fullScreen(){
+    FullScreenActions.setFullScreen(!this.state.fullScreen);
+  },
+
   render() {
     const selectedColumns = this._fieldColumns();
     return (
@@ -136,6 +145,7 @@ const ResultTable = React.createClass({
           <Button title="Collapse all messages"
                   onClick={this.collapseAll}
                   disabled={this.state.expandedMessages.size === 0}><i className="fa fa-compress" /></Button>
+          <Button title="FullScreen" onClick={this.fullScreen}><i className="fa fa-expand" /></Button>
         </ButtonGroup>
 
         <MessageTablePaginator position="top" currentPage={Number(this.props.page)}
