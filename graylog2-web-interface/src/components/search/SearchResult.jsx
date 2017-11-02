@@ -49,7 +49,6 @@ const SearchResult = React.createClass({
       showAllFields: false,
       shouldHighlight: true,
       savedSearch: SearchStore.savedSearch,
-      fullScreen:false,
     };
   },
 

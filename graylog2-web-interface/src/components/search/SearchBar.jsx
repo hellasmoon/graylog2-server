@@ -61,7 +61,6 @@ const SearchBar = React.createClass({
       searchFrom: SearchStore.searchInStream ? (SearchStore.searchInStream.title.startsWith("_IP:") ? "ip" : "group") : "group",
       chosenIP: SearchStore.searchInStream ? this._loadChosenIP() : undefined,
       chosenGroupId: SearchStore.searchInStream ? this._loadChosenGroupId() : undefined,
-      fullScreen: false,
     };
   },
   componentDidMount() {

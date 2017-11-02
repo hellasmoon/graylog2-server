@@ -1,6 +1,7 @@
 import React, { PropTypes } from 'react';
 import ReactDOM from 'react-dom';
 import { Page } from 'components/common';
+import Reflux from 'reflux';
 
 import EventHandlersThrottler from 'util/EventHandlersThrottler';
 
@@ -32,6 +33,14 @@ const MessageTablePaginator = React.createClass({
     this._setPaginationWidth();
     this._initializeAffix();
     window.addEventListener('resize', this._setPaginationWidth);
+  },
+
+  componentWillReceiveProps(nextProps){
+    if (this.props.position === 'bottom'){
+      if ((this.props.fullScreen && !nextProps.fullScreen) || (!this.props.fullScreen && nextProps.fullScreen)){
+        this._setPaginationWidth();
+      }
+    }
   },
 
   componentWillUnmount() {
