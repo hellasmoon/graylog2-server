@@ -37,7 +37,7 @@ const SearchBar = React.createClass({
     router: React.PropTypes.object,
     changeChosenGroup:React.PropTypes.func,
     lastChosenGroupId: React.PropTypes.string,
-    streams: React.PropTypes.object.isRequired,
+    streams: React.PropTypes.arrayOf(React.PropTypes.object).isRequired,
   },
 
   getDefaultProps() {
