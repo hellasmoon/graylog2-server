@@ -131,6 +131,26 @@ const ResultTable = React.createClass({
   },
 
   fullScreen(){
+    const element = document.documentElement;
+    if(!this.state.fullScreen){
+      if (element.requestFullscreen) {
+        element.requestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        element.mozRequestFullScreen();
+      } else if (element.webkitRequestFullscreen) {
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) {
+        element.msRequestFullscreen();
+      }
+    }else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
     FullScreenActions.setFullScreen(!this.state.fullScreen);
   },
   tailMode(){
@@ -140,15 +160,21 @@ const ResultTable = React.createClass({
   render() {
     let fullScreenIconClass;
     let tailModeIconClass;
+    let fullScreenTitle;
+    let tailModeTitle;
     if(!this.state.fullScreen){
       fullScreenIconClass = "fa fa-window-restore";
+      fullScreenTitle = "Full Screen"
     }else {
       fullScreenIconClass = "fa fa-window-minimize";
+      fullScreenTitle = "Exit Full Screen"
     }
     if(!this.state.tailMode){
       tailModeIconClass = "fa fa-file-code-o";
+      tailModeTitle = "File Mode";
     }else {
       tailModeIconClass = "fa fa-table";
+      tailModeTitle = "List Mode";
     }
     const selectedColumns = this._fieldColumns();
     return (
@@ -156,12 +182,12 @@ const ResultTable = React.createClass({
         <h1 className="pull-left">Messages</h1>
 
         <ButtonGroup bsSize="small" className="pull-right">
-          <Button title="Expand all messages" onClick={this.expandAll}><i className="fa fa-expand" /></Button>
-          <Button title="Collapse all messages"
-                  onClick={this.collapseAll}
-                  disabled={this.state.expandedMessages.size === 0}><i className="fa fa-compress" /></Button>
-          <Button title="FullScreen" onClick={this.tailMode}><i className={tailModeIconClass} /></Button>
-          <Button title="FullScreen" onClick={this.fullScreen}><i className={fullScreenIconClass} /></Button>
+          {/*<Button title="Expand all messages" onClick={this.expandAll}><i className="fa fa-expand" /></Button>*/}
+          {/*<Button title="Collapse all messages"*/}
+                  {/*onClick={this.collapseAll}*/}
+                  {/*disabled={this.state.expandedMessages.size === 0}><i className="fa fa-compress" /></Button>*/}
+          <Button title={tailModeTitle} onClick={this.tailMode}><i className={tailModeIconClass} /></Button>
+          <Button title={fullScreenTitle} onClick={this.fullScreen}><i className={fullScreenIconClass} /></Button>
         </ButtonGroup>
 
         <MessageTablePaginator position="top" currentPage={Number(this.props.page)}

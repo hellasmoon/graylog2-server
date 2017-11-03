@@ -81,7 +81,6 @@ const MessageTableEntry = React.createClass({
     this.props.toggleDetail(`${this.props.message.index}-${this.props.message.id}`);
   },
   render() {
-    console.log(this.state.tailMode);
     let disappear;
     if (this.state.tailMode){
       disappear = {display:"none"};
