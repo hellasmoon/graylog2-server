@@ -5,7 +5,20 @@ import { Timestamp } from 'components/common';
 import StringUtils from 'util/StringUtils';
 
 const MessageTableEntry = React.createClass({
+  getInitialState() {
+    return {
+      tailMode: this.props.tailMode,
+    };
+  },
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      tailMode:nextProps.tailMode,
+    });
+  },
   shouldComponentUpdate(newProps) {
+    if (this.props.tailMode !== newProps.tailMode){
+      return true;
+    }
     if (this.props.highlight !== newProps.highlight) {
       return true;
     }
@@ -68,6 +81,13 @@ const MessageTableEntry = React.createClass({
     this.props.toggleDetail(`${this.props.message.index}-${this.props.message.id}`);
   },
   render() {
+    console.log(this.state.tailMode);
+    let disappear;
+    if (this.state.tailMode){
+      disappear = {display:"none"};
+    }else {
+      disappear = {};
+    }
     const colSpanFixup = this.props.selectedFields.size + 1;
 
     let classes = 'message-group';
@@ -79,7 +99,7 @@ const MessageTableEntry = React.createClass({
     }
     return (
       <tbody className={classes}>
-        <tr className="fields-row" onClick={this._toggleDetail}>
+        <tr className="fields-row" onClick={this._toggleDetail} style={disappear}>
           <td><strong>
             <Timestamp dateTime={this.props.message.fields.timestamp} />
           </strong></td>

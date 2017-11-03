@@ -35,7 +35,7 @@ const ResultTable = React.createClass({
       allStreamsLoaded: false,
       allStreams: Immutable.List(),
       expandAllRenderAsync: false,
-      fullScreen:false,
+      tailMode: false,
     };
   },
   componentDidMount() {
@@ -133,8 +133,23 @@ const ResultTable = React.createClass({
   fullScreen(){
     FullScreenActions.setFullScreen(!this.state.fullScreen);
   },
+  tailMode(){
+    this.setState({tailMode:!this.state.tailMode});
+  },
 
   render() {
+    let fullScreenIconClass;
+    let tailModeIconClass;
+    if(!this.state.fullScreen){
+      fullScreenIconClass = "fa fa-window-restore";
+    }else {
+      fullScreenIconClass = "fa fa-window-minimize";
+    }
+    if(!this.state.tailMode){
+      tailModeIconClass = "fa fa-file-code-o";
+    }else {
+      tailModeIconClass = "fa fa-table";
+    }
     const selectedColumns = this._fieldColumns();
     return (
       <div className="content-col">
@@ -145,7 +160,8 @@ const ResultTable = React.createClass({
           <Button title="Collapse all messages"
                   onClick={this.collapseAll}
                   disabled={this.state.expandedMessages.size === 0}><i className="fa fa-compress" /></Button>
-          <Button title="FullScreen" onClick={this.fullScreen}><i className="fa fa-expand" /></Button>
+          <Button title="FullScreen" onClick={this.tailMode}><i className={tailModeIconClass} /></Button>
+          <Button title="FullScreen" onClick={this.fullScreen}><i className={fullScreenIconClass} /></Button>
         </ButtonGroup>
 
         <MessageTablePaginator position="top" currentPage={Number(this.props.page)}
@@ -172,6 +188,7 @@ const ResultTable = React.createClass({
                   return (
                     <MessageTableEntry key={`${message.index}-${message.id}`}
                                        message={message}
+                                       tailMode={this.state.tailMode}
                                        showMessageRow={this.props.selectedFields.contains('message')}
                                        selectedFields={selectedColumns}
                                        expanded={this.state.expandedMessages.contains(`${message.index}-${message.id}`)}
