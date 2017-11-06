@@ -78,7 +78,7 @@ class SearchStore {
             // no hash value, fall back to query if present
             if (fieldsFromQuery === undefined) {
                 // neither hash nor query set, fall back to defaults
-                this.fields = Immutable.Set<string>(['message', 'source']);
+                this.fields = Immutable.Set<string>(['message', 'HOSTIP', 'FileName']);
             } else {
                 this.fields = Immutable.Set<string>(fieldsFromQuery.split(','));
             }

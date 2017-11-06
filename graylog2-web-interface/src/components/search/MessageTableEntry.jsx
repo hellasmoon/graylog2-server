@@ -96,6 +96,10 @@ const MessageTableEntry = React.createClass({
     if (this.props.message.id === this.props.highlightMessage) {
       classes += ' message-highlight';
     }
+    let fieldName = 'full_message';
+    if (!this.props.message.fields[fieldName]){
+      fieldName = 'message';
+    }
     return (
       <tbody className={classes}>
         <tr className="fields-row" onClick={this._toggleDetail} style={disappear}>
@@ -108,7 +112,7 @@ const MessageTableEntry = React.createClass({
 
         {this.props.showMessageRow &&
         <tr className="message-row" onClick={this._toggleDetail}>
-          <td colSpan={colSpanFixup}><div className="message-wrapper">{this.possiblyHighlight('message', true)}</div></td>
+          <td colSpan={colSpanFixup}><div className="message-wrapper">{this.possiblyHighlight(fieldName, true)}</div></td>
         </tr>
         }
         {this.props.expanded &&
