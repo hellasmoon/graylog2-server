@@ -544,7 +544,7 @@ const SearchBar = React.createClass({
 
                 <div className="timerange-selector-container">
                   <div className="row no-bm">
-                    <div className="col-md-6">
+                    <div className="col-md-6" style={{width:'60%'}}>
 
                       <ButtonToolbar className="timerange-chooser pull-left">
                         <DropdownButton bsStyle="info"
@@ -569,7 +569,7 @@ const SearchBar = React.createClass({
                       {this._getRangeTypeSelector()}
 
                     </div>
-                    <div className="col-md-6">
+                    <div className="col-md-6" style={{width:'40%'}}>
                       <div className="saved-searches-selector-container pull-right"
                            style={{ display: 'inline-flex', marginRight: 5 }}>
                         {this.props.displayRefreshControls &&

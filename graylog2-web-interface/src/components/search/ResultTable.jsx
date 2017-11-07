@@ -238,10 +238,12 @@ const ResultTable = React.createClass({
         <MessageTablePaginator position="bottom" currentPage={Number(this.props.page)} fullScreen={this.state.fullScreen}
                                resultCount={this.props.resultCount}>
           <ButtonGroup bsSize="small" className="pull-right" style={{ position: 'absolute', marginTop: 20, right: 10 }}>
-            <Button title="Expand all messages" onClick={this.expandAll}><i className="fa fa-expand" /></Button>
-            <Button title="Collapse all messages"
-                    onClick={this.collapseAll}
-                    disabled={this.state.expandedMessages.size === 0}><i className="fa fa-compress" /></Button>
+            {/*<Button title="Expand all messages" onClick={this.expandAll}><i className="fa fa-expand" /></Button>*/}
+            {/*<Button title="Collapse all messages"*/}
+                    {/*onClick={this.collapseAll}*/}
+                    {/*disabled={this.state.expandedMessages.size === 0}><i className="fa fa-compress" /></Button>*/}
+            <Button title={tailModeTitle} onClick={this.tailMode}><i className={tailModeIconClass} /></Button>
+            <Button title={fullScreenTitle} onClick={this.fullScreen}><i className={fullScreenIconClass} /></Button>
           </ButtonGroup>
         </MessageTablePaginator>
       </div>

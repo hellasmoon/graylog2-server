@@ -206,31 +206,31 @@ const Navigation = React.createClass({
                   <MenuItem>Indices</MenuItem>
                 </LinkContainer>
               }
-              {this.isPermitted(this.props.permissions, ['loggers:read']) &&
-                <LinkContainer to={Routes.SYSTEM.LOGGING}>
-                  <MenuItem>Logging</MenuItem>
-                </LinkContainer>
-              }
+              {/*{this.isPermitted(this.props.permissions, ['loggers:read']) &&*/}
+                {/*<LinkContainer to={Routes.SYSTEM.LOGGING}>*/}
+                  {/*<MenuItem>Logging</MenuItem>*/}
+                {/*</LinkContainer>*/}
+              {/*}*/}
               {this.isAnyPermitted(this.props.permissions, ['users:list, roles:read']) &&
               <LinkContainer to={Routes.SYSTEM.AUTHENTICATION.OVERVIEW}>
                 <MenuItem>Authentication</MenuItem>
               </LinkContainer>
               }
-              {this.isPermitted(this.props.permissions, ['dashboards:create', 'inputs:create', 'streams:create']) &&
-              <LinkContainer to={Routes.SYSTEM.CONTENTPACKS.LIST}>
-                <MenuItem>Content Packs</MenuItem>
-              </LinkContainer>
-              }
-              {this.isPermitted(this.props.permissions, ['inputs:edit']) &&
-               <LinkContainer to={Routes.SYSTEM.GROKPATTERNS}>
-                 <MenuItem>Grok Patterns</MenuItem>
-               </LinkContainer>
-              }
-              {this.isPermitted(this.props.permissions, ['inputs:edit']) &&
-                <LinkContainer to={Routes.SYSTEM.LOOKUPTABLES.OVERVIEW}>
-                <MenuItem>Lookup Tables</MenuItem>
-                </LinkContainer>
-              }
+              {/*{this.isPermitted(this.props.permissions, ['dashboards:create', 'inputs:create', 'streams:create']) &&*/}
+              {/*<LinkContainer to={Routes.SYSTEM.CONTENTPACKS.LIST}>*/}
+                {/*<MenuItem>Content Packs</MenuItem>*/}
+              {/*</LinkContainer>*/}
+              {/*}*/}
+              {/*{this.isPermitted(this.props.permissions, ['inputs:edit']) &&*/}
+               {/*<LinkContainer to={Routes.SYSTEM.GROKPATTERNS}>*/}
+                 {/*<MenuItem>Grok Patterns</MenuItem>*/}
+               {/*</LinkContainer>*/}
+              {/*}*/}
+              {/*{this.isPermitted(this.props.permissions, ['inputs:edit']) &&*/}
+                {/*<LinkContainer to={Routes.SYSTEM.LOOKUPTABLES.OVERVIEW}>*/}
+                {/*<MenuItem>Lookup Tables</MenuItem>*/}
+                {/*</LinkContainer>*/}
+              {/*}*/}
               {pluginSystemNavigations}
             </NavDropdown>
           </Nav>
