@@ -1780,7 +1780,8 @@
       "node_modules/prop-types/factoryWithTypeCheckers.js": 936,
       "node_modules/moment/locale ../../../../../../^/.//.*$": 937,
       "node_modules/global/window.js": 938,
-      "node_modules/moment/locale ../../../../../../../../../../../../^/.//.*$": 939
+      "node_modules/moment/locale ../../../../../../../../../../../../^/.//.*$": 939,
+      "node_modules/core-js/library/modules/_to-absolute-index.js": 940
     },
     "usedIds": {
       "0": 0,
@@ -2723,6 +2724,7 @@
       "937": 937,
       "938": 938,
       "939": 939,
+      "940": 940,
       "1371": 1371,
       "1372": 1372,
       "1373": 1373,
