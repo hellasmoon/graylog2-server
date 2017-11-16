@@ -31,6 +31,7 @@ import org.apache.shiro.session.UnknownSessionException;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.glassfish.grizzly.http.server.Request;
+import org.graylog2.Configuration;
 import org.graylog2.audit.AuditActor;
 import org.graylog2.audit.AuditEventSender;
 import org.graylog2.audit.AuditEventTypes;
@@ -70,6 +71,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -89,6 +91,7 @@ public class SessionsResource extends RestResource {
     private final AuditEventSender auditEventSender;
     private final Set<IpSubnet> trustedSubnets;
     private final Request grizzlyRequest;
+    private final Configuration configuration;
 
 
     @Inject
@@ -96,6 +99,7 @@ public class SessionsResource extends RestResource {
                             DefaultSecurityManager securityManager,
                             ShiroAuthenticationFilter authenticationFilter,
                             AuditEventSender auditEventSender,
+                            Configuration configuration,
                             @Named("trusted_proxies") Set<IpSubnet> trustedSubnets,
                             @Context Request grizzlyRequest) {
         this.userService = userService;
@@ -104,6 +108,7 @@ public class SessionsResource extends RestResource {
         this.auditEventSender = auditEventSender;
         this.trustedSubnets = trustedSubnets;
         this.grizzlyRequest = grizzlyRequest;
+        this.configuration = configuration;
     }
 
     @POST
@@ -112,6 +117,8 @@ public class SessionsResource extends RestResource {
     public SessionResponse newSession(@Context ContainerRequestContext requestContext,
                                       @ApiParam(name = "Login request", value = "Username and credentials", required = true)
                                       @Valid @NotNull SessionCreateRequest createRequest) {
+        final URI ucAddr = configuration.getUcAddress();
+        System.out.println(ucAddr.toString());
         final SecurityContext securityContext = requestContext.getSecurityContext();
         if (!(securityContext instanceof ShiroSecurityContext)) {
             throw new InternalServerErrorException("Unsupported SecurityContext class, this is a bug!");

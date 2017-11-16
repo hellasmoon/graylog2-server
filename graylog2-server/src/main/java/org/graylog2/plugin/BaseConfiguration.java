@@ -47,6 +47,7 @@ public abstract class BaseConfiguration {
 
     protected static final int GRAYLOG_DEFAULT_PORT = 9000;
     protected static final int GRAYLOG_DEFAULT_WEB_PORT = 9000;
+    protected static final int UC_DEFAULT_PORT = 80;
 
     @Parameter(value = "shutdown_timeout", validator = PositiveIntegerValidator.class)
     protected int shutdownTimeout = 30000;

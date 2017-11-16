@@ -19,6 +19,7 @@ package org.graylog2;
 import com.github.joschi.jadconfig.Parameter;
 import com.github.joschi.jadconfig.ValidationException;
 import com.github.joschi.jadconfig.ValidatorMethod;
+import com.github.joschi.jadconfig.converters.BooleanConverter;
 import com.github.joschi.jadconfig.converters.TrimmedStringSetConverter;
 import com.github.joschi.jadconfig.util.Duration;
 import com.github.joschi.jadconfig.validators.DirectoryPathReadableValidator;
@@ -159,9 +160,20 @@ public class Configuration extends BaseConfiguration {
     @Parameter(value = "trusted_proxies", converter = IPSubnetConverter.class)
     private Set<IpSubnet> trustedProxies = Collections.emptySet();
 
+    @Parameter(value = "enable_uc")
+    private Boolean enableUC = false;
+
+    @Parameter(value = "uc_address", validator = URIAbsoluteValidator.class)
+    private URI ucAddress = URI.create("http://127.0.0.1:" + UC_DEFAULT_PORT);
+
+    @Parameter(value = "uc_application_key")
+    private String ucAppKey = "graylog";
+
     public boolean isMaster() {
         return isMaster;
     }
+
+    public boolean enableUC() { return enableUC; }
 
     public void setIsMaster(boolean is) {
         isMaster = is;
@@ -212,6 +224,10 @@ public class Configuration extends BaseConfiguration {
     @Override
     public URI getWebListenUri() {
         return normalizeURI(webListenUri, getWebUriScheme(), GRAYLOG_DEFAULT_WEB_PORT, "/");
+    }
+
+    public URI getUcAddress() {
+        return normalizeURI(ucAddress, "http", UC_DEFAULT_PORT, "/hmac/"+this.ucAppKey+"/");
     }
 
     public String getRootUsername() {
