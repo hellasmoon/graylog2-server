@@ -31,7 +31,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-@RequiresAuthentication
 @Api(value = "System/Configuration", description = "Read-only access to configuration settings")
 @Path("/system/configuration")
 @Produces(MediaType.APPLICATION_JSON)

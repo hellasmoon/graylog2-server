@@ -9,6 +9,7 @@ import StoreProvider from 'injection/StoreProvider';
 const SessionStore = StoreProvider.getStore('Session');
 const ServerAvailabilityStore = StoreProvider.getStore('ServerAvailability');
 const CurrentUserStore = StoreProvider.getStore('CurrentUser');
+const NodeConfigurationsStore = StoreProvider.getStore('NodeConfigurations');
 
 import 'bootstrap/less/bootstrap.less';
 import 'font-awesome/css/font-awesome.css';
@@ -19,7 +20,7 @@ import 'rickshaw/rickshaw.css';
 import 'stylesheets/graylog2.less';
 
 const AppFacade = React.createClass({
-  mixins: [Reflux.connect(SessionStore), Reflux.connect(ServerAvailabilityStore), Reflux.connect(CurrentUserStore)],
+  mixins: [Reflux.connect(NodeConfigurationsStore), Reflux.connect(SessionStore), Reflux.connect(ServerAvailabilityStore), Reflux.connect(CurrentUserStore)],
 
   componentDidMount() {
     this.interval = setInterval(ServerAvailabilityStore.ping, 20000);
@@ -32,10 +33,21 @@ const AppFacade = React.createClass({
   },
 
   render() {
+    const config = this.state.configuration;
+
     if (!this.state.server.up) {
       return <ServerUnavailablePage server={this.state.server} />;
     }
+
+    if (!config){
+      return <LoadingPage text="We are preparing Graylog for you..." />;
+    }
+
     if (!this.state.sessionId) {
+      if(config.enable_uc){
+        const ucAddress = config.uc_address;
+        console.log(ucAddress);
+      }
       return <LoginPage />;
     }
     if (!this.state.currentUser) {
