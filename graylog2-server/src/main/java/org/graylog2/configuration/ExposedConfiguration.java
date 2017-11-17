@@ -86,6 +86,9 @@ public abstract class ExposedConfiguration {
     @JsonProperty("uc_address")
     public abstract String ucAddress();
 
+    @JsonProperty("uc_application_key")
+    public abstract String ucAppKey();
+
     public static ExposedConfiguration create(Configuration configuration) {
         return create(
                 configuration.getInputbufferProcessors(),
@@ -105,7 +108,8 @@ public abstract class ExposedConfiguration {
                 configuration.getStaleMasterTimeout(),
                 configuration.getGcWarningThreshold().toString(),
                 configuration.enableUC(),
-                configuration.getUcAddress().toString());
+                configuration.getUcAddress().toString(),
+                configuration.getUcAppKey());
     }
 
     @JsonCreator
@@ -127,7 +131,8 @@ public abstract class ExposedConfiguration {
             @JsonProperty("stale_master_timeout") int staleMasterTimeout,
             @JsonProperty("gc_warning_threshold") String gcWarningThreshold,
             @JsonProperty("enable_uc") boolean enableUC,
-            @JsonProperty("uc_address") String ucAddress) {
+            @JsonProperty("uc_address") String ucAddress,
+            @JsonProperty("uc_application_key") String ucAppKey) {
         return new AutoValue_ExposedConfiguration(
                 inputBufferProcessors,
                 processBufferProcessors,
@@ -146,7 +151,8 @@ public abstract class ExposedConfiguration {
                 staleMasterTimeout,
                 gcWarningThreshold,
                 enableUC,
-                ucAddress);
+                ucAddress,
+                ucAppKey);
     }
 
 }

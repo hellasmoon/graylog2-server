@@ -175,6 +175,10 @@ public class Configuration extends BaseConfiguration {
 
     public boolean enableUC() { return enableUC; }
 
+    public String getUcAppKey() {
+        return ucAppKey;
+    }
+
     public void setIsMaster(boolean is) {
         isMaster = is;
     }

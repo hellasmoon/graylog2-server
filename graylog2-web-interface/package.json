@@ -55,7 +55,8 @@
     "typeahead.js": "^0.11.1",
     "ua-parser-js": "^0.7.12",
     "urijs": "^1.17.0",
-    "@ezetech/react-multi-level-menu-component": "^0.0.3"
+    "@ezetech/react-multi-level-menu-component": "^0.0.3",
+    "react-cookies": "^0.1.0"
   },
   "devDependencies": {
     "assets-webpack-plugin": "^3.5.1",
