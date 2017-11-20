@@ -32,5 +32,6 @@ public class AuthenticatingRealmModule extends Graylog2Module {
         auth.addBinding(LdapUserAuthenticator.NAME).to(LdapUserAuthenticator.class).in(Scopes.SINGLETON);
         auth.addBinding(PasswordAuthenticator.NAME).to(PasswordAuthenticator.class).in(Scopes.SINGLETON);
         auth.addBinding(SessionAuthenticator.NAME).to(SessionAuthenticator.class).in(Scopes.SINGLETON);
+        auth.addBinding(UCAuthenticator.NAME).to(UCAuthenticator.class).in(Scopes.SINGLETON);
     }
 }

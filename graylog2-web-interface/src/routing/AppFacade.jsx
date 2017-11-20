@@ -11,6 +11,9 @@ const ServerAvailabilityStore = StoreProvider.getStore('ServerAvailability');
 const CurrentUserStore = StoreProvider.getStore('CurrentUser');
 const NodeConfigurationsStore = StoreProvider.getStore('NodeConfigurations');
 
+import ActionsProvider from 'injection/ActionsProvider';
+const SessionActions = ActionsProvider.getActions('Session');
+
 import 'bootstrap/less/bootstrap.less';
 import 'font-awesome/css/font-awesome.css';
 import 'opensans-npm-webfont';
@@ -25,6 +28,13 @@ import $ from 'jquery';
 
 const AppFacade = React.createClass({
   mixins: [Reflux.connect(NodeConfigurationsStore), Reflux.connect(SessionStore), Reflux.connect(ServerAvailabilityStore), Reflux.connect(CurrentUserStore)],
+
+  getInitialState() {
+    return {
+      logginingFromUC: false,
+      lastError: undefined,
+    };
+  },
 
   componentDidMount() {
     this.interval = setInterval(ServerAvailabilityStore.ping, 20000);
@@ -77,31 +87,46 @@ const AppFacade = React.createClass({
           cookie.save('ticket', ticket, { path: '/' });
         }
         const queryUrl = ucAddress + "query";
-        let querySuccess = true;
+        let querySuccess = false;
+        let userData;
         $.ajax({
           async: false,
           url: queryUrl,
           data: {ticket:ticket, applicationKey:config.uc_application_key},
           success: (resp) => {
-            console.log(resp);
             if (resp.success){
-              const data =  eval('(' + resp.data + ')');
-              console.log(data);
-
+              querySuccess = true;
+              userData = eval('(' + resp.data + ')');
             }else {
-              console.log("session timeout");
+              querySuccess = false;
               cookie.remove("ticket", { path: '/' });
+              window.location.href = window.location.origin;
             }
           },
           error: (info) => {
             querySuccess = false;
           }
         });
-        if (!querySuccess){
+        if (!querySuccess || !userData){
           const uc = ucAddress.substr(0,ucAddress.indexOf("/hmac"));
           const info = "UC SERVER ERROR! Cannot connect UC server with url: "+ uc + ", and Application key: " + config.uc_application_key;
           return <LoadingPage text={info} />;
         }
+        const username = userData.principal;
+        const token = ticket;
+        const host = document.location.host;
+        const email = userData.email;
+        if (!username){
+          const uc = ucAddress.substr(0,ucAddress.indexOf("/hmac"));
+          const info = "UC SERVER ERROR! Cannot get user name from UC server with url: "+ uc + ", and Application key: " + config.uc_application_key;
+          return <LoadingPage text={info} />;
+        }
+        console.log("starting login from uc");
+        const promise = SessionActions.ucLogin.triggerPromise(username, token, host, email);
+        promise.catch((error) => {
+          window.alert("Error - the server returned: "+error.additional.status+" - "+error.message);
+        });
+
         return <LoadingPage text="We are preparing Graylog for you..." />;
       }
       return <LoginPage />;

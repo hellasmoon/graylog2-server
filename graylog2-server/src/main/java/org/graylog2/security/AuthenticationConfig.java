@@ -21,11 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import org.graylog.autovalue.WithBeanGetter;
-import org.graylog2.security.realm.AccessTokenAuthenticator;
-import org.graylog2.security.realm.LdapUserAuthenticator;
-import org.graylog2.security.realm.PasswordAuthenticator;
-import org.graylog2.security.realm.RootAccountRealm;
-import org.graylog2.security.realm.SessionAuthenticator;
+import org.graylog2.security.realm.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,6 +53,7 @@ public abstract class AuthenticationConfig {
                 // the built-in default order of authenticators
                 .realmOrder(ImmutableList.of(
                         SessionAuthenticator.NAME,
+                        UCAuthenticator.NAME,
                         AccessTokenAuthenticator.NAME,
                         LdapUserAuthenticator.NAME,
                         PasswordAuthenticator.NAME,

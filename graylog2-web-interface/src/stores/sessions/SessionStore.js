@@ -32,6 +32,16 @@ const SessionStore = Reflux.createStore({
 
     SessionActions.login.promise(promise);
   },
+  ucLogin(username, token, host, email) {
+    const builder = new Builder("POST", URLUtils.qualifyUrl(this.sourceUrl+"/uc"))
+      .json({ username: username, token: token, host: host, email: email});
+    const promise = builder.build()
+      .then((sessionInfo) => {
+        return { sessionId: sessionInfo.session_id, username: username };
+      });
+
+    SessionActions.ucLogin.promise(promise);
+  },
   logout(sessionId) {
     const promise = new Builder('DELETE', URLUtils.qualifyUrl(`${this.sourceUrl}/${sessionId}`))
       .authenticated()
@@ -46,6 +56,7 @@ const SessionStore = Reflux.createStore({
   },
 
   validate() {
+    console.log("validating...");
     const sessionId = Store.get('sessionId');
     const username = Store.get('username');
     this.validatingSession = true;
@@ -85,6 +96,14 @@ const SessionStore = Reflux.createStore({
   },
 
   loginCompleted(sessionInfo) {
+    Store.set('sessionId', sessionInfo.sessionId);
+    Store.set('username', sessionInfo.username);
+    this.sessionId = sessionInfo.sessionId;
+    this.username = sessionInfo.username;
+    this._propagateState();
+  },
+
+  ucLoginCompleted(sessionInfo) {
     Store.set('sessionId', sessionInfo.sessionId);
     Store.set('username', sessionInfo.username);
     this.sessionId = sessionInfo.sessionId;
