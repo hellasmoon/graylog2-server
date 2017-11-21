@@ -5,6 +5,10 @@ import URLUtils from 'util/URLUtils';
 import ApiRoutes from 'routing/ApiRoutes';
 import { Builder } from 'logic/rest/FetchProvider';
 
+import cookie from 'react-cookies'
+
+import $ from 'jquery';
+
 import ActionsProvider from 'injection/ActionsProvider';
 const SessionActions = ActionsProvider.getActions('Session');
 
@@ -14,6 +18,7 @@ const SessionStore = Reflux.createStore({
   sessionId: undefined,
   username: undefined,
   validatingSession: false,
+  configuration: undefined,
 
   init() {
     this.validate();
@@ -55,6 +60,10 @@ const SessionStore = Reflux.createStore({
     SessionActions.logout.promise(promise);
   },
 
+  setConfiguration(configuration){
+    this.configuration = configuration;
+  },
+
   validate() {
     console.log("validating...");
     const sessionId = Store.get('sessionId');
@@ -83,11 +92,45 @@ const SessionStore = Reflux.createStore({
       .build();
   },
 
+  _getQueryString(name) {
+    let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    let r = window.location.search.substr(1).match(reg);
+    if (r !== null) return unescape(r[2]);
+    return null;
+  },
+
   _removeSession() {
     Store.delete('sessionId');
     Store.delete('username');
     this.sessionId = undefined;
     this.username = undefined;
+    if (this.configuration){
+      if (this.configuration.enable_uc){
+        const ucAddress = this.configuration.uc_address;
+        if (ucAddress){
+          let ticket;
+          ticket = cookie.load('ticket');
+          if (!ticket){
+            ticket = this._getQueryString('ticket');
+          }
+          if (ticket){
+            const queryUrl = ucAddress + "logout";
+            $.ajax({
+              async: false,
+              url: queryUrl,
+              data: {ticket:ticket, applicationKey:this.configuration.uc_application_key},
+              success: (resp) => {
+              },
+              error: (info) => {
+                window.alert("logout from uc failed! info: "+info);
+                window.location.href = window.location.origin;
+              }
+            });
+          }
+        }
+        cookie.remove("ticket", { path: '/' });
+      }
+    }
     this._propagateState();
   },
 

@@ -38,12 +38,60 @@ const AppFacade = React.createClass({
 
   componentDidMount() {
     this.interval = setInterval(ServerAvailabilityStore.ping, 20000);
+    this.ucRenewal = setInterval(this._ucRenewal, 10000);
   },
 
   componentWillUnmount() {
     if (this.interval) {
       clearInterval(this.interval);
     }
+    if (this.ucRenewal) {
+      clearInterval(this.ucRenewal);
+    }
+  },
+
+  _ucRenewal(){
+    if (this.state.configuration){
+      if (this.state.sessionId){
+        const config = this.state.configuration;
+        if(config.enable_uc){
+          let ticket;
+          ticket = cookie.load('ticket');
+          if (!ticket){
+            ticket = this._getQueryString('ticket');
+          }
+          if (ticket){
+            const ucAddress = config.uc_address;
+            const queryUrl = ucAddress + "renewal";
+            $.ajax({
+              url: queryUrl,
+              data: {ticket:ticket, applicationKey:config.uc_application_key},
+              success: (resp) => {
+                if (resp.success){
+                  const userData = eval('(' + resp.data + ')');
+                  console.log('renewal success! data: ',userData);
+                }else {
+                  console.log(resp);
+                  window.alert("renewal failed!! url: "+queryUrl+", ticket: "+ticket+", appkey: "+config.uc_application_key+", resp: "+resp);
+                  this._doLogout();
+                }
+              },
+              error: (info) => {
+                console.log("renewal error! info: ",info);
+              }
+            });
+          }else {
+            this._doLogout();
+          }
+        }
+      }
+    }
+  },
+
+  _doLogout(){
+    SessionActions.logout.triggerPromise(SessionStore.getSessionId()).then(() => {
+      history.pushState(null, Routes.STARTPAGE);
+    });
   },
 
   _getQueryString(name) {
@@ -64,6 +112,8 @@ const AppFacade = React.createClass({
       return <LoadingPage text="We are preparing Graylog for you..." />;
     }
 
+    SessionStore.setConfiguration(config);
+
     if (!this.state.sessionId) {
       if(config.enable_uc){
         const ucAddress = config.uc_address;
@@ -79,7 +129,7 @@ const AppFacade = React.createClass({
         }
         if (!ticket){
           const uc = ucAddress.substr(0,ucAddress.indexOf("/hmac"))+"/hmac/";
-          const redirectUri = window.location.href;//TODO: 判断这里如果已经有ticket怎么办
+          const redirectUri = window.location.href;
           window.location.href = uc + "login?redirect_uri="+redirectUri+"&current_application_key="+config.uc_application_key;
           return <LoadingPage text="Wating for uc login..." />;
         }
@@ -121,7 +171,6 @@ const AppFacade = React.createClass({
           const info = "UC SERVER ERROR! Cannot get user name from UC server with url: "+ uc + ", and Application key: " + config.uc_application_key;
           return <LoadingPage text={info} />;
         }
-        console.log("starting login from uc");
         const promise = SessionActions.ucLogin.triggerPromise(username, token, host, email);
         promise.catch((error) => {
           window.alert("Error - the server returned: "+error.additional.status+" - "+error.message);
