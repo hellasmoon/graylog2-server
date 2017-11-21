@@ -65,7 +65,6 @@ const SessionStore = Reflux.createStore({
   },
 
   validate() {
-    console.log("validating...");
     const sessionId = Store.get('sessionId');
     const username = Store.get('username');
     this.validatingSession = true;

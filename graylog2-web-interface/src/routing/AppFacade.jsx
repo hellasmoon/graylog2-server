@@ -67,12 +67,8 @@ const AppFacade = React.createClass({
               url: queryUrl,
               data: {ticket:ticket, applicationKey:config.uc_application_key},
               success: (resp) => {
-                if (resp.success){
-                  const userData = eval('(' + resp.data + ')');
-                  console.log('renewal success! data: ',userData);
-                }else {
-                  console.log(resp);
-                  window.alert("renewal failed!! url: "+queryUrl+", ticket: "+ticket+", appkey: "+config.uc_application_key+", resp: "+resp);
+                if (!resp.success) {
+                  window.alert("renewal failed, may be another system has signed out from uc. Please sign in again.");
                   this._doLogout();
                 }
               },
@@ -149,6 +145,7 @@ const AppFacade = React.createClass({
               userData = eval('(' + resp.data + ')');
             }else {
               querySuccess = false;
+              console.log("query from uc failed.");
               cookie.remove("ticket", { path: '/' });
               window.location.href = window.location.origin;
             }

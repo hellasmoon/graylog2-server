@@ -31,12 +31,14 @@ const DecoratorSidebar = React.createClass({
   },
 
   componentDidMount() {
-    this._updateHeight();
-    window.addEventListener('scroll', this._updateHeight);
+    if (this.state.decorators) {
+      this._updateHeight();
+      window.addEventListener('scroll', this._updateHeight);
+    }
   },
 
   componentDidUpdate(prevProps) {
-    if (this.props.maximumHeight !== prevProps.maximumHeight) {
+    if (this.props.maximumHeight !== prevProps.maximumHeight && this.state.decorators) {
       this._updateHeight();
     }
   },
@@ -52,6 +54,7 @@ const DecoratorSidebar = React.createClass({
     const maxHeight = this.props.maximumHeight - decoratorsContainer.getBoundingClientRect().top;
 
     this.setState({ maxDecoratorsHeight: Math.max(maxHeight, this.MINIMUM_DECORATORS_HEIGHT) });
+
   },
 
   _formatDecorator(decorator) {
