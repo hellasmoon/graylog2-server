@@ -64,7 +64,42 @@ const EditRole = React.createClass({
   },
 
   _onSave() {
-    this.props.onSave(this.state.initialName, this.state.role);
+    const streams = this.props.streams;
+    const role = this.state.role;
+    let addedPerms = Immutable.Set.of();
+    let deletedPerms = Immutable.Set.of();
+    const permissions = role.permissions;
+    permissions.forEach((perm) => {
+      const p = perm.split(":");
+      const target = p[0];
+      const op = p[1];
+      const streamId = p[2];
+      if (target == "streams"){
+        streams.forEach((stream) => {
+          if (stream.id == streamId){
+            if (stream.title.indexOf("_IP:") >= 0){
+              const toDelete = `${target}:${op}:${streamId}`;
+              deletedPerms = deletedPerms.add(toDelete);
+            }else if (stream.title.indexOf("_Group:") >= 0) {
+              stream.rules.forEach((rule) => {
+                const title = "_IP:"+rule.value;
+                streams.forEach((stream) => {
+                  if (stream.title == title){
+                    const toAdd = `${target}:${op}:${stream.id}`;
+                    addedPerms = addedPerms.add(toAdd);
+                  }
+                });
+              });
+            }
+          }
+        });
+      }
+    });
+    role.permissions = Immutable.Set(role.permissions)
+      .subtract(deletedPerms)
+      .union(addedPerms)
+      .toJS();
+    this.props.onSave(this.state.initialName, role);
   },
 
   _filterStreamsByIP(stream){
