@@ -37,7 +37,6 @@ const StreamList = React.createClass({
   },
 
   render() {
-    console.log(this.props.streams);
     if (this.props.streams.length > 0) {
       const streamList = this.props.streams.sort(this._sortByTitle).filter(this._filterStream).map(this._formatStream);
 

@@ -98,6 +98,7 @@ const SearchBar = React.createClass({
       }
     }
     if (group.title.startsWith("_Group:")){
+      this.props.changeChosenGroup(group.id);
       return group.id;
     }
     return undefined;
@@ -479,6 +480,8 @@ const SearchBar = React.createClass({
   },
 
   _getSearchFromGroupSelector(){
+    console.log(this.state.chosenGroupId);
+    console.log(this.state.lastChosenGroupId);
     let selected = undefined;
     let streams = this.props.streams;
     if (this.state.chosenGroupId){
