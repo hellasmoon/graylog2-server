@@ -37,9 +37,11 @@ import org.graylog2.rest.resources.streams.responses.StreamRuleTypeResponse;
 import org.graylog2.rest.resources.streams.rules.requests.CreateStreamRuleRequest;
 import org.graylog2.shared.rest.resources.RestResource;
 import org.graylog2.shared.security.RestPermissions;
+import org.graylog2.shared.users.Role;
 import org.graylog2.streams.StreamRuleService;
 import org.graylog2.streams.StreamService;
 import org.graylog2.streams.events.StreamsChangedEvent;
+import org.graylog2.users.RoleService;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.inject.Inject;
@@ -59,6 +61,8 @@ import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @RequiresAuthentication
 @Api(value = "StreamRules", description = "Manage stream rules")
@@ -67,14 +71,17 @@ public class StreamRuleResource extends RestResource {
     private final StreamRuleService streamRuleService;
     private final StreamService streamService;
     private final ClusterEventBus clusterEventBus;
+    private final RoleService roleService;
 
     @Inject
     public StreamRuleResource(StreamRuleService streamRuleService,
                               StreamService streamService,
-                              ClusterEventBus clusterEventBus) {
+                              ClusterEventBus clusterEventBus,
+                              RoleService roleService) {
         this.streamRuleService = streamRuleService;
         this.streamService = streamService;
         this.clusterEventBus = clusterEventBus;
+        this.roleService = roleService;
     }
 
     @POST
@@ -93,6 +100,35 @@ public class StreamRuleResource extends RestResource {
         final Stream stream = streamService.load(streamId);
         final StreamRule streamRule = streamRuleService.create(streamId, cr);
         final String id = streamService.save(streamRule);
+
+        if (stream.getTitle().contains("_Group:")){
+            final List<Stream> streams = streamService.loadAll();
+            Stream streamIP = null;
+            for (Stream streamInAll: streams){
+                if (streamInAll.getTitle().equals("_IP:"+streamRule.getValue())){
+                    streamIP = streamInAll;
+                    break;
+                }
+            }
+            if (streamIP != null){
+                synchronized (StreamRuleResource.class){
+                    final Set<Role> roles = roleService.loadAll();
+                    for (Role role: roles){
+                        if (role.isReadOnly()){
+                            continue;
+                        }
+                        Set<String> perms = role.getPermissions();
+                        if (perms.contains("streams:edit:"+streamId) || perms.contains("streams:read:"+streamId)){
+                            perms.add("streams:edit:"+streamIP.getId());
+                            perms.add("streams:read:"+streamIP.getId());
+                        }
+                        role.setPermissions(perms);
+                        roleService.save(role);
+                    }
+                }
+            }
+        }
+
 
         clusterEventBus.post(StreamsChangedEvent.create(stream.getId()));
 
@@ -210,6 +246,47 @@ public class StreamRuleResource extends RestResource {
         if (streamRule.getStreamId().equals(streamid)) {
             streamRuleService.destroy(streamRule);
             clusterEventBus.post(StreamsChangedEvent.create(streamid));
+
+            Stream stream = streamService.load(streamid);
+            if (!stream.getTitle().contains("_Group:")){
+                return;
+            }
+            final List<Stream> streams = streamService.loadAll();
+            Stream streamIP = null;
+            for (Stream streamInAll: streams){
+                if (streamInAll.getTitle().equals("_IP:"+streamRule.getValue())){
+                    streamIP = streamInAll;
+                    break;
+                }
+            }
+            if (streamIP == null){
+                return;
+            }
+
+            synchronized (StreamRuleResource.class){
+                final Set<Role> roles = roleService.loadAll();
+                for (Role role: roles){
+                    if (role.isReadOnly()){
+                        continue;
+                    }
+                    boolean changed = false;
+                    Set<String> perms = role.getPermissions();
+                    if (perms.contains("streams:edit:"+streamid) || perms.contains("streams:read:"+streamid)){
+                        changed |= perms.remove("streams:edit:"+streamIP.getId());
+                        changed |= perms.remove("streams:read:"+streamIP.getId());
+                    }
+                    if (changed){
+                        role.setPermissions(perms);
+                        try {
+                            roleService.save(role);
+                        } catch (ValidationException e) {
+                            throw new BadRequestException(e);
+                        }
+                    }
+                }
+            }
+
+
         } else {
             throw new NotFoundException("Couldn't delete stream rule " + streamRuleId + "in stream " + streamid);
         }
