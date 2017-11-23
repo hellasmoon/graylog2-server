@@ -397,22 +397,18 @@ class SearchStore {
 
       return this.searchBaseLocation('index') + '?' + Qs.stringify(params);
     }
-  searchSurroundingMessagesByGroup(messageId: string, fromTime: string, toTime: string, group: any) {
+  searchSurroundingMessagesByGroup(messageId: string, fromTime: string, toTime: string, group: string) {
     var originalParams = this.getOriginalSearchParamsWithFields().toJS();
-
-    var query = group.map((ip) => `HOSTIP:"${SearchStore.escape(ip)}"`)
-      .join(' OR ');
 
     var params = {
       rangetype: 'absolute',
       from: fromTime,
       to: toTime,
-      q: query,
       highlightMessage: messageId,
       fields: originalParams.fields,
     };
 
-    return this.searchBaseLocation('index') + '?' + Qs.stringify(params);
+    return Routes.stream_search(group) + '?' + Qs.stringify(params);
   }
 }
 

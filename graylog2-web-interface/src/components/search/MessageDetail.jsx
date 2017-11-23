@@ -158,11 +158,12 @@ const MessageDetail = React.createClass({
 
     return (
       <ButtonGroup className="pull-right" bsSize="small">
+        {surroundingSearchButton}
         {showChanges}
         <Button href={messageUrl}>Permalink</Button>
 
         <ClipboardButton title="Copy ID" text={this.props.message.id} />
-        {surroundingSearchButton}
+
         {this._getTestAgainstStreamButton()}
       </ButtonGroup>
     );
