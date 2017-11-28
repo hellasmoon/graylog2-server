@@ -11,12 +11,21 @@ import { Select } from 'components/common';
 
 import StoreProvider from 'injection/StoreProvider';
 const SearchStore = StoreProvider.getStore('Search');
+import Routes from 'routing/Routes';
+import history from 'util/History';
+import Immutable from 'immutable';
+import Qs from 'qs';
+import DateTime from 'logic/datetimes/DateTime';
 
 const SourceDataTable = React.createClass({
   propTypes: {
     numberOfTopValues: PropTypes.number.isRequired,
     resetFilters: PropTypes.func.isRequired,
     setSearchFilter: PropTypes.func.isRequired,
+    streams: React.PropTypes.arrayOf(React.PropTypes.object),
+    selected: React.PropTypes.string,
+    range: PropTypes.number.isRequired,
+    resolution: React.PropTypes.string.isRequired,
   },
 
   getInitialState() {
@@ -28,7 +37,11 @@ const SourceDataTable = React.createClass({
   _getAddToSearchButton(source) {
     const addToSearchButton = document.createElement('button');
     addToSearchButton.className = 'btn btn-xs btn-default dc-search-button';
-    addToSearchButton.title = 'Add to search query';
+    if (this.props.selected){
+      addToSearchButton.title = 'Add to search query';
+    }else {
+      addToSearchButton.title = 'Search log in this group';
+    }
     addToSearchButton.setAttribute('data-source', StringUtils.unescapeHTML(source));
     addToSearchButton.innerHTML = "<i class='fa fa-search-plus'></i>";
 
@@ -64,7 +77,40 @@ const SourceDataTable = React.createClass({
   _addSourceToSearchBarListener(table) {
     table.selectAll('td.dc-table-column .dc-search-button').on('click', () => {
       const source = $(d3.event.target).closest('button').data('source');
-      SearchStore.addSearchTerm('source', source, UniversalSearch.orOperator());
+      const params = SearchStore.getParams();
+      const selected = this.props.selected;
+      const streams = this.props.streams;
+
+      if (params.rangeType === 'absolute') {
+        const fromInput = params.rangeParams.get('from');
+        const toInput = params.rangeParams.get('to');
+
+        params.rangeParams.set('from',DateTime.parseFromString(fromInput).toISOString());
+        params.rangeParams.set('to',DateTime.parseFromString(toInput).toISOString());
+      }
+
+      var searchParams = Immutable.Map();
+      searchParams = searchParams.set('rangetype', params.rangeType);
+      searchParams = searchParams.merge(params.rangeParams);
+      searchParams = searchParams.set('q', params.query);
+
+
+      const queryString = Qs.stringify(searchParams.toJS());
+
+
+      if (streams){
+        if (selected){
+          SearchStore.addSearchTerm('HOSTIP', source, UniversalSearch.orOperator());
+        }else {
+          streams.map((stream) => {
+            if (stream.title.indexOf("_Group:") >= 0){
+              if (stream.title.substr(7) == source){
+                history.push(Routes.stream_search(stream.id)+"?"+queryString);
+              }
+            }
+          });
+        }
+      }
     });
   },
 

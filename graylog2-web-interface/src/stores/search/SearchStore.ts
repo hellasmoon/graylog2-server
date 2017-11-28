@@ -397,6 +397,9 @@ class SearchStore {
 
       return this.searchBaseLocation('index') + '?' + Qs.stringify(params);
     }
+    setSearchInGroup(group){
+      this.searchInStream = group;
+    }
   searchSurroundingMessagesByGroup(messageId: string, fromTime: string, toTime: string, group: string) {
     var originalParams = this.getOriginalSearchParamsWithFields().toJS();
 

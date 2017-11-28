@@ -454,28 +454,68 @@ const SearchBar = React.createClass({
   },
 
   _onGroupSelect(stream_id) {
+
+    this._closeSearchQueryAutoCompletion();
+
+    // Convert from and to values to UTC
+    if (this.state.rangeType === 'absolute') {
+      const fromInput = this.refs.fromFormatted.getValue();
+      const toInput = this.refs.toFormatted.getValue();
+
+      this.from.value = DateTime.parseFromString(fromInput).toISOString();
+      this.to.value = DateTime.parseFromString(toInput).toISOString();
+    }
+
+    this.fields.value = SearchStore.fields.join(',');
+    this.width.value = SearchStore.width;
+    this.highlightMessage.value = SearchStore.highlightMessage;
+
+    const searchForm = this.refs.searchForm;
+    const searchQuery = $(searchForm).serialize();
+
     if (stream_id === ''){
       this.props.changeChosenGroup(undefined);
-      history.push(Routes.search());
+
+      history.push(Routes.search()+"?"+searchQuery);
     }else{
       this.props.changeChosenGroup(stream_id);
-      history.push(Routes.stream_search(stream_id));
+
+      history.push(Routes.stream_search(stream_id)+"?"+searchQuery);
     }
   },
 
   _onIPSelect(stream_id) {
+
+    this._closeSearchQueryAutoCompletion();
+
+    // Convert from and to values to UTC
+    if (this.state.rangeType === 'absolute') {
+      const fromInput = this.refs.fromFormatted.getValue();
+      const toInput = this.refs.toFormatted.getValue();
+
+      this.from.value = DateTime.parseFromString(fromInput).toISOString();
+      this.to.value = DateTime.parseFromString(toInput).toISOString();
+    }
+
+    this.fields.value = SearchStore.fields.join(',');
+    this.width.value = SearchStore.width;
+    this.highlightMessage.value = SearchStore.highlightMessage;
+
+    const searchForm = this.refs.searchForm;
+    const searchQuery = $(searchForm).serialize();
+
     if (stream_id === ''){
       if (this.props.lastChosenGroupId){
         this.props.changeChosenGroup(this.props.lastChosenGroupId);
-        history.push(Routes.stream_search(this.props.lastChosenGroupId));
+        history.push(Routes.stream_search(this.props.lastChosenGroupId)+"?"+searchQuery);
       }else {
         this.props.changeChosenGroup(undefined);
-        history.push(Routes.search());
+        history.push(Routes.search()+"?"+searchQuery);
       }
 
     }else{
       this.props.changeChosenGroup(this.props.lastChosenGroupId);
-      history.push(Routes.stream_search(stream_id));
+      history.push(Routes.stream_search(stream_id)+"?"+searchQuery);
     }
   },
 

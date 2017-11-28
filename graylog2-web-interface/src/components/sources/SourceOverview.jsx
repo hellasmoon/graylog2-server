@@ -219,7 +219,6 @@ const SourceOverview = React.createClass({
     let newFilters = undefined;
 
     if (filters){
-      newFilters = [];
       if (select){
         newFilters = filters;
       }else {
@@ -227,6 +226,9 @@ const SourceOverview = React.createClass({
           streams.map((stream) => {
             if (stream.title.indexOf("_Group:") >= 0){
               if (stream.title.substr(7) == filter){
+                if (!newFilters && stream.rules.length > 0){
+                  newFilters = [];
+                }
                 stream.rules.map((rule) => {
                   newFilters.push(rule.value);
                 });
@@ -238,9 +240,12 @@ const SourceOverview = React.createClass({
     }else {
       if (select){
         if (streams){
-          newFilters = [];
           streams.map((stream) => {
             if (stream.id == select){
+              if (!newFilters && stream.rules.length > 0){
+                newFilters = [];
+              }
+              console.log("newFilters: ",newFilters);
               stream.rules.map((rule) => {
                 newFilters.push(rule.value);
               });
@@ -249,7 +254,8 @@ const SourceOverview = React.createClass({
         }
       }
     }
-    console.log("newFilters: ", newFilters);
+
+    console.log("newFilters: ",newFilters);
 
     HistogramDataActions.load(this.state.range, newFilters, SCREEN_RESOLUTION)
       .then((histogramData) => {
@@ -441,6 +447,10 @@ const SourceOverview = React.createClass({
         <div className="row content" style={{ display: this.state.loading ? 'none' : 'block' }}>
           <div className="col-md-7">
             <SourceDataTable ref="sourceDataTable" resetFilters={this.resetSourcesFilters}
+                             streams={this.state.streams}
+                             selected={this.state.selectedStream}
+                             range={this.state.range}
+                             resolution={this.state.resolution}
                              setSearchFilter={this.setSearchFilter} numberOfTopValues={this.NUMBER_OF_TOP_VALUES} />
           </div>
           <div className="col-md-3 col-md-offset-1">
