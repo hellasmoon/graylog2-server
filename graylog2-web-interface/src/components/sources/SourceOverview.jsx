@@ -9,13 +9,14 @@ import SourceDataTable from './SourceDataTable';
 import SourcePieChart from './SourcePieChart';
 import SourceLineChart from './SourceLineChart';
 import SupportLink from 'components/support/SupportLink';
-import { Spinner } from 'components/common';
+import { Spinner, Select } from 'components/common';
 
 import DateTime from 'logic/datetimes/DateTime';
 import UniversalSearch from 'logic/search/UniversalSearch';
 import EventHandlersThrottler from 'util/EventHandlersThrottler';
 
 import StoreProvider from 'injection/StoreProvider';
+const StreamsStore = StoreProvider.getStore('Streams');
 const SourcesStore = StoreProvider.getStore('Sources');
 const HistogramDataStore = StoreProvider.getStore('HistogramData');
 const SearchStore = StoreProvider.getStore('Search');
@@ -52,6 +53,8 @@ const SourceOverview = React.createClass({
       renderResultTable: true,
       histogramDataAvailable: true,
       reloadingHistogram: false,
+      streams: undefined,
+      selectedStream: undefined,
     };
   },
 
@@ -78,6 +81,12 @@ const SourceOverview = React.createClass({
         this.syncRangeWithQuery();
       }
     };
+
+    StreamsStore.load((streams) => {
+      this.setState({
+        streams: streams,
+      }, this.loadData());
+    });
 
     this.refs.sourceDataTable.renderDataTable(this.messageCountDimension, this.nameMessageGroup, onDataTableFiltered);
     this.refs.sourcePieChart.renderPieChart(this.nameDimension, this.nameMessageGroup, onPieChartFiltered);
@@ -122,7 +131,7 @@ const SourceOverview = React.createClass({
       this._updateWidth();
     };
 
-    SourcesStore.loadSources(this.state.range, onLoaded);
+    SourcesStore.loadIPs(this.state.range, onLoaded);
   },
 
   _resetSources(sources) {
@@ -133,6 +142,55 @@ const SourceOverview = React.createClass({
      * we need to remove the dimension and graphs filters, but we only need to reapply filters to the
      * graphs, dc will propagate that to the crossfilter dimension.
      */
+    const streams = this.state.streams;
+    const select = this.state.selectedStream;
+    let newSources = [];
+    if (streams){
+      if (select){
+        streams.map((stream) => {
+          if (stream.id == select){
+            let totalCount = 0;
+            sources.map((source) => {
+              stream.rules.map((rule) => {
+                if (rule.value == source.name){
+                  totalCount += source.message_count;
+                }
+              });
+            });
+            sources.map((source) => {
+              stream.rules.map((rule) => {
+                if (rule.value == source.name){
+                  const newSource = {name:rule.value, percentage:source.message_count*100/totalCount, message_count:source.message_count};
+                  newSources.push(newSource);
+                }
+              });
+            });
+          }
+        });
+      }else {
+        streams.map((stream) => {
+          if (stream.title.indexOf("_Group:") >=0 ){
+            let per = 0;
+            let count = 0;
+            sources.map((source) => {
+              stream.rules.map((rule) => {
+                if (rule.value == source.name){
+                  per += source.percentage;
+                  count += source.message_count;
+                }
+              });
+            });
+            const newSource = {name:stream.title.substr(7), percentage:per, message_count:count};
+            newSources.push(newSource);
+          }
+        });
+        newSources = newSources.filter((source) => {
+          if (source.message_count > 0){
+            return source;
+          }
+        });
+      }
+    }
     const pieChartFilters = this.refs.sourcePieChart.getFilters();
     const dataTableFilters = this.refs.sourceDataTable.getFilters();
     this.nameDimension.filterAll();
@@ -140,7 +198,7 @@ const SourceOverview = React.createClass({
     this.refs.sourcePieChart.clearFilters();
     this.refs.sourceDataTable.clearFilters();
     this.sourcesData.remove();
-    this.sourcesData.add(sources);
+    this.sourcesData.add(newSources);
 
     pieChartFilters.forEach(filter => this.refs.sourcePieChart.setFilter(filter));
     dataTableFilters.forEach(filter => this.refs.sourceDataTable.setFilter(filter));
@@ -156,7 +214,44 @@ const SourceOverview = React.createClass({
       filters = this.nameDimension.top(Infinity).map(source => UniversalSearch.escape(source.name));
     }
 
-    HistogramDataActions.load(this.state.range, filters, SCREEN_RESOLUTION)
+    const streams = this.state.streams;
+    const select = this.state.selectedStream;
+    let newFilters = undefined;
+
+    if (filters){
+      newFilters = [];
+      if (select){
+        newFilters = filters;
+      }else {
+        filters.map((filter) => {
+          streams.map((stream) => {
+            if (stream.title.indexOf("_Group:") >= 0){
+              if (stream.title.substr(7) == filter){
+                stream.rules.map((rule) => {
+                  newFilters.push(rule.value);
+                });
+              }
+            }
+          })
+        });
+      }
+    }else {
+      if (select){
+        if (streams){
+          newFilters = [];
+          streams.map((stream) => {
+            if (stream.id == select){
+              stream.rules.map((rule) => {
+                newFilters.push(rule.value);
+              });
+            }
+          });
+        }
+      }
+    }
+    console.log("newFilters: ", newFilters);
+
+    HistogramDataActions.load(this.state.range, newFilters, SCREEN_RESOLUTION)
       .then((histogramData) => {
         this.setState({
           resolution: histogramData.interval,
@@ -313,6 +408,12 @@ const SourceOverview = React.createClass({
     });
   },
 
+  _onGroupSelectChange(stream_id){
+    this.setState({
+      selectedStream: stream_id
+    }, () => this.loadData());
+  },
+
   render() {
     const emptySources = (
       <div className="row content">
@@ -349,12 +450,26 @@ const SourceOverview = React.createClass({
         </div>
       </div>
     );
+    const groups = [];
+    const streams = this.state.streams;
+    if (streams){
+      streams.map((stream) => {
+        if (stream.title.indexOf("_Group:") >= 0){
+          const group = {label:stream.title.substr(7), value:stream.id};
+          groups.push(group);
+        }
+      });
+    }
 
     return (
       <div>
         <div className="row content">
           <div className="col-md-12">
             <div>
+              <div className="pull-right" style={{'width': '200px', 'marginLeft': "15px"}}>
+                <Select placeholder="group dimension" options={groups} value={this.state.selectedStream}
+                        onValueChange={this._onGroupSelectChange} size="small" />
+              </div>
               <div className="pull-right">
                 <select ref="rangeSelector" className="sources-range form-control input-sm" value={this.state.range}
                         onChange={this._onRangeChanged}>
@@ -365,6 +480,7 @@ const SourceOverview = React.createClass({
                   <option value={daysToSeconds(365)}>Last Year</option>
                   <option value="0">All</option>
                 </select>
+
               </div>
               <h1>Sources</h1>
             </div>

@@ -40,7 +40,23 @@ const SourcesStore = {
                 UserNotification.error("Loading of sources data failed with status: " + errorThrown + ". Try reloading the page.",
                     "Could not load sources data");
             });
+    },
+
+  loadIPs(range: number, callback: (sources: Array<Source>) => void) {
+    let url = URLUtils.qualifyUrl(this.SOURCES_URL+"/ip");
+    if (typeof range !== 'undefined') {
+      url += "?range=" + range;
     }
+    fetch('GET', url)
+      .then(response => {
+        var sources = processSourcesData(response.sources);
+        callback(sources);
+      })
+      .catch((errorThrown) => {
+        UserNotification.error("Loading of sources data failed with status: " + errorThrown + ". Try reloading the page.",
+          "Could not load sources data");
+      });
+  }
 };
 
 export = SourcesStore;

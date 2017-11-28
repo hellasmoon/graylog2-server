@@ -107,4 +107,46 @@ public class SourcesResource extends RestResource {
 
         return SourcesList.create(sources.getTerms().size(), sources.getTerms(), sources.tookMs(), range);
     }
+
+    @GET
+    @Path("/ip")
+    @Timed
+    @ApiOperation(
+            value = "Get a list of all sources (not more than 5000) that have messages in the current indices. " +
+                    "The result is cached for 10 seconds.",
+            notes = "Range: The parameter is in seconds relative to the current time. 86400 means 'in the last day'," +
+                    "0 is special and means 'across all indices'")
+    @ApiResponses(value = {
+            @ApiResponse(code = 400, message = "Invalid range parameter provided.")
+    })
+    @Produces(MediaType.APPLICATION_JSON)
+    public SourcesList ipList(
+            @ApiParam(name = "range", value = "Relative timeframe to search in. See method description.", required = true)
+            @QueryParam("range") @Min(0) final int range,
+            @ApiParam(name = "size", value = "Maximum size of the result set.", required = false, defaultValue = "5000")
+            @QueryParam("size") @DefaultValue("5000") @Min(0) final int size) {
+        final TermsResult sources;
+        try {
+            sources = CACHE.get(range, new Callable<TermsResult>() {
+                @Override
+                public TermsResult call() throws Exception {
+                    try {
+                        return searches.terms("HOSTIP", size, "*", RelativeRange.create(range));
+                    } catch (InvalidRangeParametersException e) {
+                        throw new ExecutionException(e);
+                    }
+                }
+            });
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof InvalidRangeParametersException) {
+                LOG.error("Invalid relative time range: " + range, e);
+                throw new BadRequestException("Invalid time range: " + range, e);
+            } else {
+                LOG.error("Could not calculate list of sources.", e);
+                throw new InternalServerErrorException(e);
+            }
+        }
+
+        return SourcesList.create(sources.getTerms().size(), sources.getTerms(), sources.tookMs(), range);
+    }
 }

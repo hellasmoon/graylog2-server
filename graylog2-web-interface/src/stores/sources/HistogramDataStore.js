@@ -23,7 +23,7 @@ const HistogramDataStore = Reflux.createStore({
     const urlQuery = {};
 
     if (typeof sourceNames !== 'undefined' && sourceNames instanceof Array) {
-      urlQuery.query = sourceNames.map(source => `source:${source}`).join(' OR ');
+      urlQuery.query = sourceNames.map(source => `HOSTIP:${source}`).join(' OR ');
     } else {
       urlQuery.query = '*';
     }

@@ -7,6 +7,7 @@ import numeral from 'numeral';
 import SourceTitle from './SourceTitle';
 import UniversalSearch from 'logic/search/UniversalSearch';
 import StringUtils from 'util/StringUtils';
+import { Select } from 'components/common';
 
 import StoreProvider from 'injection/StoreProvider';
 const SearchStore = StoreProvider.getStore('Search');
