@@ -245,7 +245,6 @@ const SourceOverview = React.createClass({
               if (!newFilters && stream.rules.length > 0){
                 newFilters = [];
               }
-              console.log("newFilters: ",newFilters);
               stream.rules.map((rule) => {
                 newFilters.push(rule.value);
               });
@@ -254,8 +253,6 @@ const SourceOverview = React.createClass({
         }
       }
     }
-
-    console.log("newFilters: ",newFilters);
 
     HistogramDataActions.load(this.state.range, newFilters, SCREEN_RESOLUTION)
       .then((histogramData) => {

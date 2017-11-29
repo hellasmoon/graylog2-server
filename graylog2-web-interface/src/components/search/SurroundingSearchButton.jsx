@@ -93,7 +93,7 @@ const SurroundingSearchButton = React.createClass({
     const group = [];
     const streamsInter = this.props.messageFields.streams;
     let streams = this.props.allStreams.filter((stream) => {
-      if(streamsInter.indexOf(stream.id) > 0){
+      if(streamsInter.indexOf(stream.id) >= 0){
         return stream;
       }
     });
@@ -107,7 +107,6 @@ const SurroundingSearchButton = React.createClass({
       streams.map((stream) => {
         groupItem.push({name: key+"|"+stream.id+"|group", text: stream.title.substr(7)});
       });
-      console.log(groupItem);
       return groupItem;
     }else {
       return null;
@@ -117,8 +116,9 @@ const SurroundingSearchButton = React.createClass({
 
   _getIPItem(key){
     const streamsInter = this.props.messageFields.streams;
+    console.log(streamsInter);
     let streams = this.props.allStreams.filter((stream) => {
-      if(streamsInter.indexOf(stream.id) > 0){
+      if(streamsInter.indexOf(stream.id) >= 0){
         return stream;
       }
     });
