@@ -76,7 +76,6 @@ const SurroundingSearchButton = React.createClass({
     const type = name.substr(i);
 
     const searchLink = this._searchLinkByType(key, type);
-    console.log(searchLink);
     history.push(searchLink);
   },
 
@@ -91,44 +90,48 @@ const SurroundingSearchButton = React.createClass({
 
   _getGroupItem(key){
     const group = [];
-    const streamsInter = this.props.messageFields.streams;
-    let streams = this.props.allStreams.filter((stream) => {
-      if(streamsInter.indexOf(stream.id) >= 0){
-        return stream;
-      }
-    });
-    streams = streams.filter((stream) => {
-      if (stream.title.startsWith("_Group:")){
-        return stream;
-      }
-    });
-    if (streams.size > 0){
-      let groupItem = [];
-      streams.map((stream) => {
-        groupItem.push({name: key+"|"+stream.id+"|group", text: stream.title.substr(7)});
-      });
-      return groupItem;
-    }else {
+    const hostip = this.props.messageFields.HOSTIP;
+    if (!hostip){
       return null;
     }
-
+    const streams = this.props.allStreams;
+    if (!streams){
+      return null;
+    }
+    streams.map((stream) => {
+      if (stream.title.indexOf("_Group:") >= 0 && stream.rules){
+        stream.rules.map((rule) => {
+          if (rule.value == hostip){
+            group.push({name: key+"|"+stream.id+"|group", text: stream.title.substr(7)});
+          }
+        });
+      }
+    });
+    if (group.length > 0 ){
+      return group;
+    } else {
+      return null;
+    }
   },
 
   _getIPItem(key){
-    const streamsInter = this.props.messageFields.streams;
-    console.log(streamsInter);
-    let streams = this.props.allStreams.filter((stream) => {
-      if(streamsInter.indexOf(stream.id) >= 0){
-        return stream;
+    const hostip = this.props.messageFields.HOSTIP;
+    if (!hostip){
+      return null;
+    }
+    const streams = this.props.allStreams;
+    if (!streams){
+      return null;
+    }
+    let group = undefined;
+    streams.map((stream) => {
+      if (stream.title.indexOf("_IP:") >= 0 && stream.title.substr(4) == hostip){
+        group = stream;
       }
     });
-    streams = streams.filter((stream) => {
-      if (stream.title.startsWith("_IP:")){
-        return stream;
-      }
-    });
-    if (streams.size > 0){
-      return {name: key+"|"+streams.get(0).id+"|ip", text: "search by IP"};
+
+    if (group){
+      return {name: key+"|"+group.id+"|ip", text: "search by IP"};
     }else {
       return null;
     }
