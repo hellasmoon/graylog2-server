@@ -161,7 +161,7 @@ public class Configuration extends BaseConfiguration {
     private Set<IpSubnet> trustedProxies = Collections.emptySet();
 
     @Parameter(value = "enable_uc")
-    private Boolean enableUC = false;
+    private boolean enableUC = false;
 
     @Parameter(value = "uc_address", validator = URIAbsoluteValidator.class)
     private URI ucAddress = URI.create("http://127.0.0.1:" + UC_DEFAULT_PORT);
@@ -169,11 +169,34 @@ public class Configuration extends BaseConfiguration {
     @Parameter(value = "uc_application_key")
     private String ucAppKey = "graylog";
 
+    @Parameter(value = "enable_app_center")
+    private boolean enableAppCenter = false;
+
+    @Parameter(value = "app_center_api_address", validator = URIAbsoluteValidator.class)
+    private URI appCenterAPIAddress = URI.create("http://127.0.0.1:" + APP_STORE_DEFAULT_PORT + APP_STORE_DEFAULT_URI);
+
+    @Parameter(value = "app_center_sync_interval", validator = PositiveDurationValidator.class)
+    private Duration appCenterSyncInterval = Duration.hours(12);
+
     public boolean isMaster() {
         return isMaster;
     }
 
-    public boolean enableUC() { return enableUC; }
+    public boolean enableUC() {
+        return enableUC;
+    }
+
+    public boolean isAppCenterEnable() {
+        return enableAppCenter;
+    }
+
+    public URI getAppCenterApiAddress() {
+        return appCenterAPIAddress;
+    }
+
+    public Duration getAppCenterSyncInterval() {
+        return appCenterSyncInterval;
+    }
 
     public String getUcAppKey() {
         return ucAppKey;

@@ -89,6 +89,9 @@ public abstract class ExposedConfiguration {
     @JsonProperty("uc_application_key")
     public abstract String ucAppKey();
 
+    @JsonProperty("enable_app_center")
+    public abstract boolean isAppCenterEnable();
+
     public static ExposedConfiguration create(Configuration configuration) {
         return create(
                 configuration.getInputbufferProcessors(),
@@ -109,7 +112,8 @@ public abstract class ExposedConfiguration {
                 configuration.getGcWarningThreshold().toString(),
                 configuration.enableUC(),
                 configuration.getUcAddress().toString(),
-                configuration.getUcAppKey());
+                configuration.getUcAppKey(),
+                configuration.isAppCenterEnable());
     }
 
     @JsonCreator
@@ -132,7 +136,8 @@ public abstract class ExposedConfiguration {
             @JsonProperty("gc_warning_threshold") String gcWarningThreshold,
             @JsonProperty("enable_uc") boolean enableUC,
             @JsonProperty("uc_address") String ucAddress,
-            @JsonProperty("uc_application_key") String ucAppKey) {
+            @JsonProperty("uc_application_key") String ucAppKey,
+            @JsonProperty("enable_app_center") boolean isAppCenterEnable) {
         return new AutoValue_ExposedConfiguration(
                 inputBufferProcessors,
                 processBufferProcessors,
@@ -152,7 +157,8 @@ public abstract class ExposedConfiguration {
                 gcWarningThreshold,
                 enableUC,
                 ucAddress,
-                ucAppKey);
+                ucAppKey,
+                isAppCenterEnable);
     }
 
 }
