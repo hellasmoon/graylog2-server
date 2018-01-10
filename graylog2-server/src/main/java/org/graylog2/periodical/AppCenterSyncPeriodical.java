@@ -168,6 +168,9 @@ public class AppCenterSyncPeriodical extends Periodical {
     }
 
     private String addNewStream(String title, String description) throws ValidationException {
+        if (description == null){
+            description = "";
+        }
         ObjectId id = new ObjectId();
         final IndexSet indexSet = indexSetRegistry.getDefault();
         final Map<String, Object> streamData = ImmutableMap.<String, Object>builder()
